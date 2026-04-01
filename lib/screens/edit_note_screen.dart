@@ -136,6 +136,7 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
             child: ElevatedButton(
+              key: Key('save_note_button'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
@@ -251,6 +252,7 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
               ),
               const SizedBox(height: 24),
               TextField(
+                key: Key('note_title_field'),
                 controller: _titleController,
                 style: AppTypography.h1.copyWith(fontStyle: FontStyle.italic, color: Color.fromRGBO(0, 0, 0, 0.7)),
                 decoration: const InputDecoration(
@@ -264,6 +266,7 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
               const SizedBox(height: 8),
               Expanded(
                 child: TextField(
+                  key: Key('note_body_field'),
                   controller: _bodyController,
                   style: AppTypography.body1.copyWith(color: Colors.black87),
                   decoration: const InputDecoration(

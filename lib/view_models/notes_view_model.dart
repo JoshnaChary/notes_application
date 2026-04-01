@@ -7,7 +7,7 @@ import '../strings/app_strings.dart';
 /// ViewModel for managing notes state and operations
 /// Handles business logic, state management, and Supabase integration
 class NotesViewModel extends ChangeNotifier {
-  final SupabaseClient _supabase = Supabase.instance.client;
+  late final SupabaseClient _supabase;
   
   // State variables
   List<Note> _notes = [];
@@ -20,6 +20,18 @@ class NotesViewModel extends ChangeNotifier {
   // Category filters
   int _activeCategory = 0; // 0: All notes, 1: Favourites, 2: Pinned
   int _activeSubCategory = 0; // 0: ALL, 1: PERSONAL, 2: WORK, 3: URGENT, 4: PEACE
+
+  // Constructor
+  NotesViewModel() {
+    // Initialize Supabase with error handling
+    try {
+      _supabase = Supabase.instance.client;
+    } catch (e) {
+      debugPrint('Error initializing Supabase: $e');
+      // Fallback to default initialization
+      _supabase = Supabase.instance.client;
+    }
+  }
 
   // Getters
   List<Note> get notes => _notes;
@@ -41,26 +53,46 @@ class NotesViewModel extends ChangeNotifier {
     _setLoading(true);
     _clearError();
     
-    try {
-      // For now, use hardcoded user ID. Later, this will be auth.uid()
-      final userId = AppConfig.hardcodedUserId;
-      
-      final response = await _supabase
-          .from(AppConfig.notesTable)
-          .select()
-          .eq('user_id', userId)
-          .order('updated_at', ascending: false);
+    int retryCount = 0;
+    const maxRetries = 3;
+    
+    while (retryCount < maxRetries) {
+      try {
+        // For now, use hardcoded user ID. Later, this will be auth.uid()
+        final userId = AppConfig.hardcodedUserId;
+        
+        final response = await _supabase
+            .from('notes')
+            .select()
+            .eq('user_id', userId)
+            .order('updated_at', ascending: false);
 
-      if (response.isNotEmpty) {
-        _notes = response.map((data) => Note.fromSupabase(data)).toList();
-        _applyFilters();
+        if (response.isNotEmpty) {
+          _notes = response.map((data) => Note.fromSupabase(data)).toList();
+          _applyFilters();
+          break; // Success, exit retry loop
+        } else {
+          retryCount++;
+          if (retryCount < maxRetries) {
+            await Future.delayed(Duration(seconds: 2 * retryCount)); // Exponential backoff
+            continue;
+          }
+        }
+      } catch (e) {
+        retryCount++;
+        debugPrint('Attempt $retryCount: Error loading notes: $e');
+        
+        if (retryCount < maxRetries) {
+          await Future.delayed(Duration(seconds: 2 * retryCount));
+          continue;
+        } else {
+          _setError('Network error: Failed to connect to Supabase after $maxRetries attempts. Please check your internet connection.');
+          break;
+        }
       }
-    } catch (e) {
-      _setError('Failed to load notes: ${e.toString()}');
-      debugPrint('Error loading notes: $e');
-    } finally {
-      _setLoading(false);
     }
+    
+    _setLoading(false);
   }
 
   /// Create a new note in Supabase
@@ -72,7 +104,7 @@ class NotesViewModel extends ChangeNotifier {
       final noteData = note.toSupabase();
       noteData['user_id'] = AppConfig.hardcodedUserId;
       
-      await _supabase.from(AppConfig.notesTable).insert(noteData);
+      await _supabase.from('notes').insert(noteData);
       await loadNotes(); // Refresh the list
     } catch (e) {
       _setError('Failed to create note: ${e.toString()}');
@@ -89,7 +121,7 @@ class NotesViewModel extends ChangeNotifier {
     
     try {
       await _supabase
-          .from(AppConfig.notesTable)
+          .from('notes')
           .update(note.toSupabase())
           .eq('id', note.id)
           .eq('user_id', AppConfig.hardcodedUserId);
@@ -110,7 +142,7 @@ class NotesViewModel extends ChangeNotifier {
     
     try {
       await _supabase
-          .from(AppConfig.notesTable)
+          .from('notes')
           .delete()
           .eq('id', noteId)
           .eq('user_id', AppConfig.hardcodedUserId);
