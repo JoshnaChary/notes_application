@@ -1,0 +1,25 @@
+## Rule 1 — No Hardcoded Strings
+- Move all hardcoded strings to `lib/core/constants/app_strings.dart`
+- Use static const fields. Example: static const String loginTitle = 'Welcome Back';
+- Reference in UI as: Text(AppStrings.loginTitle)
+
+## Rule 2 — No Hardcoded Colors
+- Move all hardcoded colors to `lib/core/constants/app_colors.dart`
+- Use static const fields. Example: static const Color primary = Color(0xFF1A73E8);
+- Reference in UI as: color: AppColors.primary
+- Never use Colors.red, Colors.blue, or Color(0xFF...) directly in widget files
+
+## Rule 3 — MVVM Pattern
+- Each feature has two files:
+  - `<feature>_screen.dart` → UI only (widget tree, layout, no logic)
+  - `<feature>_view_model.dart` → all logic, state, API calls (extends ChangeNotifier)
+- Never put business logic inside screen files
+- Never put widgets inside ViewModel files
+- Screen listens to ViewModel via Provider or Riverpod
+
+## Rule 4 — Test Coverage
+- Every ViewModel must have a corresponding test file in `test/` folder
+- Test file named: `<feature>_view_model_test.dart`
+- Cover all public methods, state changes, and edge cases
+- Widget tests required for every screen file
+- Minimum coverage target: 80%
