@@ -78,6 +78,24 @@ class _NotesScreenState extends State<NotesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Helper method to generate chip keys
+    String getChipKey(String category) {
+      switch (category) {
+        case 'ALL':
+          return 'chip_all';
+        case 'WORK':
+          return 'chip_work';
+        case 'URGENT':
+          return 'chip_urgent';
+        case 'PERSONAL':
+          return 'chip_personal';
+        case 'PEACE':
+          return 'chip_peace';
+        default:
+          return 'chip_${category.toLowerCase()}';
+      }
+    }
+
     final viewModel = context.watch<NotesViewModel>();
     final filteredNotes = viewModel.filteredNotes;
     
@@ -153,6 +171,7 @@ class _NotesScreenState extends State<NotesScreen> {
         centerTitle: !viewModel.isSearching,
         actions: [
           IconButton(
+            key: Key('search_button'),
             icon: Icon(viewModel.isSearching ? Icons.close : Icons.search),
             onPressed: () {
               final newSearching = !viewModel.isSearching;
@@ -182,6 +201,7 @@ class _NotesScreenState extends State<NotesScreen> {
                         right: idx == _tabs.length - 1 ? AppSpacing.lg : AppSpacing.sm,
                       ),
                       child: InkWell(
+                        key: Key(getChipKey(_tabs[idx])),
                         onTap: () => viewModel.filterBySubCategory(idx),
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -304,19 +324,35 @@ class _NotesScreenState extends State<NotesScreen> {
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             if (isFavourite)
-                                              Padding(
-                                                padding: const EdgeInsets.only(bottom: 4),
-                                                child: Icon(
-                                                  Icons.star,
-                                                  color: Colors.grey,
-                                                  size: 22,
+                                              GestureDetector(
+                                                key: Key('favourite_button'),
+                                                onTap: () {
+                                                  // Toggle favourite functionality
+                                                  final provider = Provider.of<NotesViewModel>(context, listen: false);
+                                                  provider.toggleFavouriteStatus(note.id);
+                                                },
+                                                child: Padding(
+                                                  padding: const EdgeInsets.only(bottom: 4),
+                                                  child: Icon(
+                                                    Icons.star,
+                                                    color: Colors.grey,
+                                                    size: 22,
+                                                  ),
                                                 ),
                                               ),
                                             if (isPinned)
-                                              Icon(
-                                                Icons.push_pin,
-                                                color: AppColors.secondary,
-                                                size: 20,
+                                              GestureDetector(
+                                                key: Key('pin_button'),
+                                                onTap: () {
+                                                  // Toggle pin functionality
+                                                  final provider = Provider.of<NotesViewModel>(context, listen: false);
+                                                  provider.togglePinStatus(note.id);
+                                                },
+                                                child: Icon(
+                                                  Icons.push_pin,
+                                                  color: AppColors.secondary,
+                                                  size: 20,
+                                                ),
                                               ),
                                           ],
                                         ),
@@ -333,6 +369,7 @@ class _NotesScreenState extends State<NotesScreen> {
         ),
       ),
       floatingActionButton: GestureDetector(
+        key: Key('fab_create_note'),
         onTap: () {
           Navigator.pushNamed(context, '/edit');
         },

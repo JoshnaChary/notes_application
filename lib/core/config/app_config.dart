@@ -9,4 +9,9 @@ class AppConfig {
   static const String notesTable = 'notes';
   static const String categoriesTable = 'categories';
   static const String usersTable = 'users';
+  
+  // Get working Supabase URL
+  static String getWorkingSupabaseUrl() {
+    return supabaseUrl;
+  }
 }
