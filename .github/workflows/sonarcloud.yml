@@ -31,12 +31,14 @@ jobs:
       - name: Run Flutter tests with coverage
         run: flutter test --coverage
 
-      - name: Verify coverage file was generated
+      - name: Check coverage file exists
         run: |
-          echo "Checking coverage file..."
+          echo "=== Coverage folder contents ==="
           ls -la coverage/
-          echo "lcov.info content preview:"
-          head -20 coverage/lcov.info
+          echo "=== lcov.info line count ==="
+          wc -l coverage/lcov.info
+          echo "=== lcov.info preview ==="
+          head -30 coverage/lcov.info
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@e44e1f68c7e374e39e09e37b5e5b66d6a5fb73a9
