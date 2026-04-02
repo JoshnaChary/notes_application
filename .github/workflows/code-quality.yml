@@ -36,7 +36,9 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y lcov
 
       - name: Clean coverage report
-        run: lcov --remove coverage/lcov.info 'lib/generated/*' -o coverage/lcov.info
+        run: |
+          lcov --remove coverage/lcov.info 'lib/generated/*' -o coverage/lcov.info --ignore-errors unused || true
+          test -f coverage/lcov.info
 
       - name: Install Qlty
         run: |
