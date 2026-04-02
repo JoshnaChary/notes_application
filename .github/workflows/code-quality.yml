@@ -53,4 +53,4 @@ jobs:
           QLTY_COVERAGE_TOKEN: ${{ secrets.QLTY_COVERAGE_TOKEN }}
         run: |
           test -f coverage/lcov.info
-          qlty coverage upload coverage/lcov.info
+          qlty coverage publish coverage/lcov.info
