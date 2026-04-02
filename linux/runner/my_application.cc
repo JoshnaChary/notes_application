@@ -34,7 +34,7 @@ static void my_application_activate(GApplication* application) {
   // if future cases occur).
   gboolean use_header_bar = TRUE;
 #ifdef GDK_WINDOWING_X11
-  GdkScreen* screen = gtk_window_get_screen(window);
+  auto screen = gtk_window_get_screen(window);
   if (GDK_IS_X11_SCREEN(screen)) {
     const gchar* wm_name = gdk_x11_screen_get_window_manager_name(screen);
     if (g_strcmp0(wm_name, "GNOME Shell") != 0) {
@@ -43,7 +43,7 @@ static void my_application_activate(GApplication* application) {
   }
 #endif
   if (use_header_bar) {
-    GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
+    auto header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
     gtk_widget_show(GTK_WIDGET(header_bar));
     gtk_header_bar_set_title(header_bar, "notes_application");
     gtk_header_bar_set_show_close_button(header_bar, TRUE);
@@ -86,9 +86,10 @@ static gboolean my_application_local_command_line(GApplication* application,
   // Strip out the first argument as it is the binary name.
   self->dart_entrypoint_arguments = g_strdupv(*arguments + 1);
 
-  g_autoptr(GError) error = nullptr;
-  if (!g_application_register(application, nullptr, &error)) {
-    g_warning("Failed to register: %s", error->message);
+  if (GError* error = nullptr;
+      !g_application_register(application, nullptr, &error)) {
+    g_autoptr(GError) error_autoptr = error;
+    g_warning("Failed to register: %s", error_autoptr->message);
     *exit_status = 1;
     return TRUE;
   }
@@ -101,8 +102,6 @@ static gboolean my_application_local_command_line(GApplication* application,
 
 // Implements GApplication::startup.
 static void my_application_startup(GApplication* application) {
-  // MyApplication* self = MY_APPLICATION(object);
-
   // Perform any actions required at application startup.
 
   G_APPLICATION_CLASS(my_application_parent_class)->startup(application);
@@ -110,8 +109,6 @@ static void my_application_startup(GApplication* application) {
 
 // Implements GApplication::shutdown.
 static void my_application_shutdown(GApplication* application) {
-  // MyApplication* self = MY_APPLICATION(object);
-
   // Perform any actions required at application shutdown.
 
   G_APPLICATION_CLASS(my_application_parent_class)->shutdown(application);
@@ -133,7 +130,9 @@ static void my_application_class_init(MyApplicationClass* klass) {
   G_OBJECT_CLASS(klass)->dispose = my_application_dispose;
 }
 
-static void my_application_init(MyApplication* self) {}
+static void my_application_init(MyApplication* /*self*/) {
+  // Intentionally empty: no additional initialization is required here.
+}
 
 MyApplication* my_application_new() {
   // Set the program name to the application ID, which helps various systems

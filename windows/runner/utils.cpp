@@ -24,7 +24,7 @@ void CreateAndAttachConsole() {
 std::vector<std::string> GetCommandLineArguments() {
   // Convert the UTF-16 command line arguments to UTF-8 for the Engine to use.
   int argc;
-  wchar_t** argv = ::CommandLineToArgvW(::GetCommandLineW(), &argc);
+  auto argv = ::CommandLineToArgvW(::GetCommandLineW(), &argc);
   if (argv == nullptr) {
     return std::vector<std::string>();
   }
@@ -45,7 +45,7 @@ std::string Utf8FromUtf16(const wchar_t* utf16_string) {
   if (utf16_string == nullptr) {
     return std::string();
   }
-  unsigned int target_length = ::WideCharToMultiByte(
+  auto target_length = ::WideCharToMultiByte(
       CP_UTF8, WC_ERR_INVALID_CHARS, utf16_string,
       -1, nullptr, 0, nullptr, nullptr)
     -1; // remove the trailing null character
@@ -55,10 +55,11 @@ std::string Utf8FromUtf16(const wchar_t* utf16_string) {
     return utf8_string;
   }
   utf8_string.resize(target_length);
-  int converted_length = ::WideCharToMultiByte(
-      CP_UTF8, WC_ERR_INVALID_CHARS, utf16_string,
-      input_length, utf8_string.data(), target_length, nullptr, nullptr);
-  if (converted_length == 0) {
+  if (int converted_length = ::WideCharToMultiByte(
+          CP_UTF8, WC_ERR_INVALID_CHARS, utf16_string,
+          input_length, utf8_string.data(), target_length, nullptr,
+          nullptr);
+      converted_length == 0) {
     return std::string();
   }
   return utf8_string;
