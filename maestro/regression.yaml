@@ -1,0 +1,234 @@
+# Regression suite: navigation drawer, sub-category tabs, create (favourite / pinned), delete.
+# Strings/semantics match lib/strings/app_strings.dart, notes_screen.dart, edit_note_screen.dart.
+# - Drawer categories: "All notes", "Favourites", "Pinned" (AppStrings.allNotes, etc.)
+# - Sub-tabs (horizontal): ALL, PERSONAL, WORK, URGENT, PEACE (_tabs order in notes_screen.dart)
+#   If activeSubCategory != ALL, the list is filtered by that sub-category only (NotesViewModel).
+#   After TC-02 the tab strip may be on PEACE etc. — tap ALL before assertions or new notes (default WORK) vanish.
+# - FAB: Semantics identifier fab_create_note; Edit: tooltip "Show menu"; Save text "Save"
+# - Body field hint: AppStrings.startWriting → "Start writing your thoughts..."
+# - List cards (ALL sub-tab): category badge + title + body read as one block in Maestro — use assertVisible: |- …
+# appId: Android applicationId (android/app/build.gradle.kts). iOS bundle: com.example.notesApplication.
+appId: com.example.notes_application
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "Notes App"
+    timeout: 60000
+- waitForAnimationToEnd
+
+# -----------------------------------------------------------------------------
+# TC-01: Top menu (drawer) — verify all three primary categories are visible
+# -----------------------------------------------------------------------------
+- tapOn: "Open navigation menu"
+- assertVisible: "All notes"
+- assertVisible: "Favourites"
+- assertVisible: "Pinned"
+- tapOn: "All notes"
+- waitForAnimationToEnd
+
+# -----------------------------------------------------------------------------
+# TC-02: Sub-category tab bar — for each primary category, all five sub-tabs are present
+# Swipe on the tab strip (below the app bar) so PEACE is reachable on narrow widths.
+# After revealing PEACE, swipe back so the strip returns to the start — otherwise ALL
+# stays off-screen when opening the drawer and switching category.
+# -----------------------------------------------------------------------------
+# --- All notes ---
+- assertVisible: "ALL"
+- assertVisible: "PERSONAL"
+- assertVisible: "WORK"
+- assertVisible: "URGENT"
+- swipe:
+    start: "72%, 16%"
+    end: "28%, 16%"
+- assertVisible: "PEACE"
+- swipe:
+    start: "28%, 16%"
+    end: "72%, 16%"
+
+# --- Favourites ---
+- tapOn: "Open navigation menu"
+- tapOn: "Favourites"
+- waitForAnimationToEnd
+- assertVisible: "ALL"
+- assertVisible: "PERSONAL"
+- assertVisible: "WORK"
+- assertVisible: "URGENT"
+- swipe:
+    start: "72%, 16%"
+    end: "28%, 16%"
+- assertVisible: "PEACE"
+- swipe:
+    start: "28%, 16%"
+    end: "72%, 16%"
+
+# --- Pinned ---
+- tapOn: "Open navigation menu"
+- tapOn: "Pinned"
+- waitForAnimationToEnd
+- assertVisible: "ALL"
+- assertVisible: "PERSONAL"
+- assertVisible: "WORK"
+- assertVisible: "URGENT"
+- swipe:
+    start: "72%, 16%"
+    end: "28%, 16%"
+- assertVisible: "PEACE"
+- swipe:
+    start: "28%, 16%"
+    end: "72%, 16%"
+
+# Back to All notes for TC-03+
+- tapOn: "Open navigation menu"
+- tapOn: "All notes"
+- waitForAnimationToEnd
+
+# -----------------------------------------------------------------------------
+# TC-03: Create a favourite card and verify it appears under Favourites
+# Edit overflow: "Show menu" -> "Mark as Favourite" (AppStrings.markAsFavourite)
+# -----------------------------------------------------------------------------
+- tapOn:
+    id: "fab_create_note"
+- extendedWaitUntil:
+    visible: "Start writing your thoughts..."
+    timeout: 15000
+- waitForAnimationToEnd
+- tapOn: "Title"
+- inputText: "Maestro TC03 Favourite"
+- tapOn: "Start writing your thoughts..."
+- inputText: "Regression body for favourite."
+- tapOn: "Show menu"
+- tapOn: "Mark as Favourite"
+- tapOn: "Save"
+- waitForAnimationToEnd
+- tapOn: "Open navigation menu"
+- tapOn: "Favourites"
+- waitForAnimationToEnd
+# Show ALL sub-notes (not only PEACE/PERSONAL/…) so the new card is listed
+- swipe:
+    start: "28%, 16%"
+    end: "72%, 16%"
+- tapOn: "ALL"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: |-
+      WORK
+      Maestro TC03 Favourite
+      Regression body for favourite.
+    timeout: 45000
+- assertVisible: |-
+    WORK
+    Maestro TC03 Favourite
+    Regression body for favourite.
+
+# -----------------------------------------------------------------------------
+# TC-04: Create a pinned card and verify it appears under Pinned
+# "Show menu" -> "Pin Note" (AppStrings.pinNote)
+# -----------------------------------------------------------------------------
+- tapOn: "Open navigation menu"
+- tapOn: "All notes"
+- waitForAnimationToEnd
+- tapOn:
+    id: "fab_create_note"
+- extendedWaitUntil:
+    visible: "Start writing your thoughts..."
+    timeout: 15000
+- waitForAnimationToEnd
+- tapOn: "Title"
+- inputText: "Maestro TC04 Pinned"
+- tapOn: "Start writing your thoughts..."
+- inputText: "Regression body for pinned."
+- tapOn: "Show menu"
+- tapOn: "Pin Note"
+- tapOn: "Save"
+- waitForAnimationToEnd
+- tapOn: "Open navigation menu"
+- tapOn: "Pinned"
+- swipe:
+    start: "28%, 16%"
+    end: "72%, 16%"
+- tapOn: "ALL"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: |-
+      WORK
+      Maestro TC04 Pinned
+      Regression body for pinned.
+    timeout: 45000
+- assertVisible: |-
+    WORK
+    Maestro TC04 Pinned
+    Regression body for pinned.
+
+# -----------------------------------------------------------------------------
+# TC-05: Delete a card and verify it is gone from All notes, Favourites, and Pinned
+# Sheet primary button Key('delete_button'), label AppStrings.delete ("Delete Note")
+# -----------------------------------------------------------------------------
+- tapOn: "Open navigation menu"
+- tapOn: "All notes"
+- waitForAnimationToEnd
+- tapOn:
+    id: "fab_create_note"
+- extendedWaitUntil:
+    visible: "Start writing your thoughts..."
+    timeout: 15000
+- waitForAnimationToEnd
+- tapOn: "Title"
+- inputText: "Maestro TC05 Delete"
+- tapOn: "Start writing your thoughts..."
+- inputText: "Will be removed."
+- tapOn: "Save"
+- waitForAnimationToEnd
+- tapOn: |-
+    WORK
+    Maestro TC05 Delete
+    Will be removed.
+
+- extendedWaitUntil:
+    visible: "Save"
+    timeout: 15000
+- waitForAnimationToEnd
+- tapOn: "Show menu"
+- tapOn: "Delete Note"
+- waitForAnimationToEnd
+- tapOn: "Delete Note"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "Notes App"
+    timeout: 30000
+- extendedWaitUntil:
+    notVisible: |-
+      WORK
+      Maestro TC05 Delete
+      Will be removed.
+    timeout: 20000
+
+- assertNotVisible: |-
+    WORK
+    Maestro TC05 Delete
+    Will be removed.
+
+- tapOn: "Open navigation menu"
+- tapOn: "Favourites"
+- waitForAnimationToEnd
+- swipe:
+    start: "28%, 16%"
+    end: "72%, 16%"
+- tapOn: "ALL"
+- waitForAnimationToEnd
+- assertNotVisible: |-
+    WORK
+    Maestro TC05 Delete
+    Will be removed.
+
+- tapOn: "Open navigation menu"
+- tapOn: "Pinned"
+- waitForAnimationToEnd
+- swipe:
+    start: "28%, 16%"
+    end: "72%, 16%"
+- tapOn: "ALL"
+- waitForAnimationToEnd
+- assertNotVisible: |-
+    WORK
+    Maestro TC05 Delete
+    Will be removed.

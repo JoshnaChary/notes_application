@@ -67,17 +67,10 @@ class NotesViewModel extends ChangeNotifier {
             .eq('user_id', userId)
             .order('updated_at', ascending: false);
 
-        if (response.isNotEmpty) {
-          _notes = response.map((data) => Note.fromSupabase(data)).toList();
-          _applyFilters();
-          break; // Success, exit retry loop
-        } else {
-          retryCount++;
-          if (retryCount < maxRetries) {
-            await Future.delayed(Duration(seconds: 2 * retryCount)); // Exponential backoff
-            continue;
-          }
-        }
+        // Empty list is valid (e.g. user deleted all notes). Only retry on exceptions.
+        _notes = response.map((data) => Note.fromSupabase(data)).toList();
+        _applyFilters();
+        break;
       } catch (e) {
         retryCount++;
         debugPrint('Attempt $retryCount: Error loading notes: $e');

@@ -105,6 +105,7 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
       Navigator.popUntil(context, ModalRoute.withName('/'));
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
+          duration: const Duration(seconds: 5),
           content: Text(AppStrings.noteDeleted),
           action: SnackBarAction(
             label: AppStrings.undo,
