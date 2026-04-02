@@ -25,24 +25,28 @@ jobs:
           flutter-version: '3.x'
           channel: 'stable'
 
-      - name: Install Flutter dependencies
+      - name: Install dependencies
         run: flutter pub get
+
+      - name: Build Flutter project
+        run: flutter build apk --debug
+        continue-on-error: true
 
       - name: Run Flutter tests with coverage
         run: flutter test --coverage
 
-      - name: Check coverage file exists
+      - name: Verify coverage file
         run: |
-          echo "=== Coverage folder contents ==="
+          echo "=== Coverage folder ==="
           ls -la coverage/
-          echo "=== lcov.info line count ==="
+          echo "=== lcov.info lines ==="
           wc -l coverage/lcov.info
           echo "=== lcov.info preview ==="
           head -30 coverage/lcov.info
 
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@e44e1f68c7e374e39e09e37b5e5b66d6a5fb73a9
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
 
