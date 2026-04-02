@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+
 import '../strings/app_strings.dart';
 import '../theme/colors.dart';
 
 class DeleteConfirmationDialog extends StatelessWidget {
   final VoidCallback onDelete;
   final VoidCallback onCancel;
-  const DeleteConfirmationDialog({super.key, required this.onDelete, required this.onCancel});
+
+  const DeleteConfirmationDialog({
+    super.key,
+    required this.onDelete,
+    required this.onCancel,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -15,11 +21,11 @@ class DeleteConfirmationDialog extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(28),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: Colors.black12,
             blurRadius: 16,
-            offset: const Offset(0, 4),
+            offset: Offset(0, 4),
           ),
         ],
       ),
@@ -36,12 +42,12 @@ class DeleteConfirmationDialog extends StatelessWidget {
             child: const Icon(Icons.delete_forever, color: AppColors.error, size: 32),
           ),
           const SizedBox(height: 24),
-          Text(
+          const Text(
             AppStrings.deleteThisNote,
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: AppColors.textPrimary),
           ),
           const SizedBox(height: 16),
-          Text(
+          const Text(
             AppStrings.deleteConfirmation,
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 15, color: AppColors.textTertiary),
@@ -50,7 +56,7 @@ class DeleteConfirmationDialog extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              key: Key('delete_button'),
+              key: const Key('delete_button'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.error,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
@@ -61,14 +67,17 @@ class DeleteConfirmationDialog extends StatelessWidget {
                 Navigator.pop(context);
                 onDelete();
               },
-              child: Text(AppStrings.delete, style: TextStyle(color: AppColors.textInverse, fontWeight: FontWeight.bold, fontSize: 16)),
+              child: const Text(
+                AppStrings.delete,
+                style: TextStyle(color: AppColors.textInverse, fontWeight: FontWeight.bold, fontSize: 16),
+              ),
             ),
           ),
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              key: Key('confirm_delete_button'),
+              key: const Key('confirm_delete_button'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.placeholder,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
@@ -79,7 +88,10 @@ class DeleteConfirmationDialog extends StatelessWidget {
                 Navigator.pop(context);
                 onCancel();
               },
-              child: Text(AppStrings.cancel, style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold, fontSize: 16)),
+              child: const Text(
+                AppStrings.cancel,
+                style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold, fontSize: 16),
+              ),
             ),
           ),
         ],

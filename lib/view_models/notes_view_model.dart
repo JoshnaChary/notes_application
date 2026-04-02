@@ -59,7 +59,7 @@ class NotesViewModel extends ChangeNotifier {
     while (retryCount < maxRetries) {
       try {
         // For now, use hardcoded user ID. Later, this will be auth.uid()
-        final userId = AppConfig.hardcodedUserId;
+        const userId = AppConfig.hardcodedUserId;
         
         final response = await _supabase
             .from('notes')
@@ -76,7 +76,7 @@ class NotesViewModel extends ChangeNotifier {
         debugPrint('Attempt $retryCount: Error loading notes: $e');
         
         if (retryCount < maxRetries) {
-          await Future.delayed(Duration(seconds: 2 * retryCount));
+          await Future<void>.delayed(Duration(seconds: 2 * retryCount));
           continue;
         } else {
           _setError('Network error: Failed to connect to Supabase after $maxRetries attempts. Please check your internet connection.');
@@ -152,14 +152,14 @@ class NotesViewModel extends ChangeNotifier {
   /// Toggle pin status of a note
   Future<void> togglePinStatus(String noteId) async {
     final note = _notes.firstWhere((n) => n.id == noteId);
-    final updatedNote = note.copyWith(isPinned: !note.isPinned);
+    final updatedNote = note.copyWith(NotePatch(isPinned: !note.isPinned));
     await updateNote(updatedNote);
   }
 
   /// Toggle favourite status of a note
   Future<void> toggleFavouriteStatus(String noteId) async {
     final note = _notes.firstWhere((n) => n.id == noteId);
-    final updatedNote = note.copyWith(isFavourite: !note.isFavourite);
+    final updatedNote = note.copyWith(NotePatch(isFavourite: !note.isFavourite));
     await updateNote(updatedNote);
   }
 

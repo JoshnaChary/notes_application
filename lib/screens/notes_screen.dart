@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/note_model.dart';
 import '../view_models/notes_view_model.dart';
 import '../theme/colors.dart';
 import '../theme/typography.dart';
@@ -11,6 +12,30 @@ class _SidebarItem {
   final String label;
   final IconData icon;
   const _SidebarItem(this.label, this.icon);
+}
+
+/// Maps tab label to Maestro/test key id (extracted from build for Sonar S3776).
+String _chipKeyForTab(String tab) {
+  switch (tab) {
+    case AppStrings.all:
+      return 'chip_all';
+    case AppStrings.work:
+      return 'chip_work';
+    case AppStrings.urgent:
+      return 'chip_urgent';
+    case AppStrings.personal:
+      return 'chip_personal';
+    case AppStrings.peace:
+      return 'chip_peace';
+    default:
+      return 'chip_${tab.toLowerCase()}';
+  }
+}
+
+Key? _semanticKeyForNoteTitle(String title) {
+  if (title.contains('Favourite')) return const Key('favourite_test_note');
+  if (title.contains('Pinned')) return const Key('pinned_test_note');
+  return null;
 }
 
 // Helper for category badge
@@ -67,7 +92,7 @@ class _NotesScreenState extends State<NotesScreen> {
     const _SidebarItem(AppStrings.pinned, Icons.push_pin),
   ];
   final List<String> _tabs = [AppStrings.all, AppStrings.personal, AppStrings.work, AppStrings.urgent, AppStrings.peace];
-  
+
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -78,327 +103,324 @@ class _NotesScreenState extends State<NotesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Helper method to generate chip keys
-    String getChipKey(String category) {
-      switch (category) {
-        case 'ALL':
-          return 'chip_all';
-        case 'WORK':
-          return 'chip_work';
-        case 'URGENT':
-          return 'chip_urgent';
-        case 'PERSONAL':
-          return 'chip_personal';
-        case 'PEACE':
-          return 'chip_peace';
-        default:
-          return 'chip_${category.toLowerCase()}';
-      }
-    }
-
     final viewModel = context.watch<NotesViewModel>();
     final filteredNotes = viewModel.filteredNotes;
-    
+
     return Scaffold(
       extendBody: true,
       backgroundColor: const Color(0xFFF0F2F5),
-      drawer: Drawer(
-        backgroundColor: const Color(0xFFF0F2F5),
-        child: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 30),
-              ...List.generate(_sidebarItems.length, (idx) {
-                final item = _sidebarItems[idx];
-                final selected = viewModel.activeCategory == idx;
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                  child: Material(
-                    color: selected ? const Color(0xFFCCE0FF) : Colors.transparent,
-                    borderRadius: BorderRadius.circular(20),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(20),
-                      onTap: () {
-                        viewModel.filterByCategory(idx);
-                        Navigator.pop(context);
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-                        child: Row(
-                          children: [
-                            Icon(item.icon, color: selected ? const Color(0xFF003366) : Colors.grey, size: 28),
-                            const SizedBox(width: 18),
-                            Text(
-                              item.label,
-                              style: TextStyle(
-                                fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-                                color: selected ? const Color(0xFF003366) : Colors.grey,
-                                fontSize: 18,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              }),
-            ],
-          ),
-        ),
-      ),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: viewModel.isSearching
-            ? TextField(
-                controller: _searchController,
-                autofocus: true,
-                decoration: InputDecoration(
-                  hintText: AppStrings.searchNotes,
-                  border: InputBorder.none,
-                  hintStyle: AppTypography.hint,
-                ),
-                style: AppTypography.body1.copyWith(
-                  color: AppColors.textPrimary,
-                  fontSize: 18,
-                ),
-                onChanged: (value) {
-                  viewModel.setSearchQuery(value);
-                },
-              )
-            : Text(AppStrings.appName, style: AppTypography.h2),
-        centerTitle: !viewModel.isSearching,
-        actions: [
-          IconButton(
-            key: Key('search_button'),
-            icon: Icon(viewModel.isSearching ? Icons.close : Icons.search),
-            onPressed: () {
-              final newSearching = !viewModel.isSearching;
-              viewModel.setIsSearching(newSearching);
-              if (!newSearching) {
-                _searchController.clear();
-              }
-            },
-          ),
-        ],
-      ),
+      drawer: _buildDrawer(viewModel),
+      appBar: _buildAppBar(viewModel),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Tab bar
-            Container(
-              color: Colors.white,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: List.generate(_tabs.length, (idx) {
-                    final selected = viewModel.activeSubCategory == idx;
-                    return Padding(
-                      padding: EdgeInsets.only(
-                        left: idx == 0 ? AppSpacing.lg : AppSpacing.sm,
-                        right: idx == _tabs.length - 1 ? AppSpacing.lg : AppSpacing.sm,
-                      ),
-                      child: InkWell(
-                        key: Key(getChipKey(_tabs[idx])),
-                        onTap: () => viewModel.filterBySubCategory(idx),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                _tabs[idx],
-                                style: TextStyle(
-                                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-                                  color: selected ? AppColors.primary : Colors.grey,
-                                  fontSize: 16,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              AnimatedContainer(
-                                duration: const Duration(milliseconds: 180),
-                                height: 3,
-                                width: selected ? 28 : 0,
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary,
-                                  borderRadius: BorderRadius.circular(2),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
-                ),
-              ),
-            ),
-            if (viewModel.errorMessage != null)
-              Container(
-                margin: const EdgeInsets.all(AppSpacing.md),
-                padding: const EdgeInsets.all(AppSpacing.sm),
-                color: Colors.red.shade100,
-                child: Text(
-                  viewModel.errorMessage!,
-                  style: TextStyle(color: Colors.red.shade900),
-                ),
-              ),
-            Expanded(
-              child: viewModel.isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : filteredNotes.isEmpty
-                      ? _buildEmptyState()
-                      : ListView.builder(
-                          padding: const EdgeInsets.only(
-                            left: AppSpacing.lg,
-                            right: AppSpacing.md,
-                            top: AppSpacing.sm,
-                            bottom: 24,
-                          ),
-                          itemCount: filteredNotes.length,
-                          itemBuilder: (context, idx) {
-                            final note = filteredNotes[idx];
-                            final bool isPinned = note.isPinned;
-                            final bool isFavourite = note.isFavourite;
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                              child: GestureDetector(
-                                onTap: () {
-                                  ScaffoldMessenger.of(context).clearSnackBars();
-                                  Navigator.pushNamed(
-                                    context,
-                                    '/edit',
-                                    arguments: note,
-                                  );
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: isPinned ? AppColors.placeholder : Colors.white,
-                                    borderRadius: BorderRadius.circular(16),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.04),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      // Main content area with flexible width
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            // Line 1: Category badge (only in ALL tab)
-                                            if (viewModel.activeSubCategory == 0) ...[
-                                              buildCategoryBadge(note.category),
-                                              const SizedBox(height: 14),
-                                            ],
-                                            // Line 2: Title
-                                            Text(
-                                              key: note.title.contains("Favourite") 
-                                                ? Key('favourite_test_note')
-                                                : note.title.contains("Pinned")
-                                                    ? Key('pinned_test_note')
-                                                    : null,
-                                              note.title,
-                                              style: AppTypography.h2,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            const SizedBox(height: 10),
-                                            // Line 3: Description
-                                            Text(
-                                              note.body,
-                                              style: AppTypography.body2.copyWith(color: AppColors.textTertiary),
-                                              maxLines: 3,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      // Icons area with fixed width
-                                      if (isFavourite || isPinned) ...[
-                                        const SizedBox(width: 12),
-                                        Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            if (isFavourite)
-                                              GestureDetector(
-                                                key: Key('favourite_button'),
-                                                onTap: () {
-                                                  // Toggle favourite functionality
-                                                  final provider = Provider.of<NotesViewModel>(context, listen: false);
-                                                  provider.toggleFavouriteStatus(note.id);
-                                                },
-                                                child: Padding(
-                                                  padding: const EdgeInsets.only(bottom: 4),
-                                                  child: Icon(
-                                                    Icons.star,
-                                                    color: Colors.grey,
-                                                    size: 22,
-                                                  ),
-                                                ),
-                                              ),
-                                            if (isPinned)
-                                              GestureDetector(
-                                                key: Key('pin_button'),
-                                                onTap: () {
-                                                  // Toggle pin functionality
-                                                  final provider = Provider.of<NotesViewModel>(context, listen: false);
-                                                  provider.togglePinStatus(note.id);
-                                                },
-                                                child: Icon(
-                                                  Icons.push_pin,
-                                                  color: AppColors.secondary,
-                                                  size: 20,
-                                                ),
-                                              ),
-                                          ],
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-            ),
+            _buildTabBar(viewModel),
+            if (viewModel.errorMessage != null) _buildErrorBanner(viewModel.errorMessage!),
+            Expanded(child: _buildNotesBody(viewModel, filteredNotes)),
           ],
         ),
       ),
-      floatingActionButton: Semantics(
-        label: "Create Note",
-        hint: "Create a new note",
-        identifier: "fab_create_note",
-        child: GestureDetector(
-          onTap: () {
-            ScaffoldMessenger.of(context).clearSnackBars();
-            Navigator.pushNamed(context, '/edit');
-          },
-          child: Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.primary,
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.4),
-                  blurRadius: 12,
-                  offset: const Offset(0, 6),
+      floatingActionButton: _buildFab(),
+    );
+  }
+
+  Widget _buildDrawer(NotesViewModel viewModel) {
+    return Drawer(
+      backgroundColor: const Color(0xFFF0F2F5),
+      child: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 30),
+            ...List.generate(_sidebarItems.length, (idx) {
+              final item = _sidebarItems[idx];
+              final selected = viewModel.activeCategory == idx;
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                child: Material(
+                  color: selected ? const Color(0xFFCCE0FF) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(20),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(20),
+                    onTap: () {
+                      viewModel.filterByCategory(idx);
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+                      child: Row(
+                        children: [
+                          Icon(item.icon, color: selected ? const Color(0xFF003366) : Colors.grey, size: 28),
+                          const SizedBox(width: 18),
+                          Text(
+                            item.label,
+                            style: TextStyle(
+                              fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                              color: selected ? const Color(0xFF003366) : Colors.grey,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
-              ],
-            ),
-            child: const Icon(Icons.add, size: 32, color: Colors.white),
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar(NotesViewModel viewModel) {
+    return AppBar(
+      backgroundColor: Colors.white,
+      title: viewModel.isSearching
+          ? TextField(
+              controller: _searchController,
+              autofocus: true,
+              decoration: InputDecoration(
+                hintText: AppStrings.searchNotes,
+                border: InputBorder.none,
+                hintStyle: AppTypography.hint,
+              ),
+              style: AppTypography.body1.copyWith(
+                color: AppColors.textPrimary,
+                fontSize: 18,
+              ),
+              onChanged: viewModel.setSearchQuery,
+            )
+          : Text(AppStrings.appName, style: AppTypography.h2),
+      centerTitle: !viewModel.isSearching,
+      actions: [
+        IconButton(
+          key: const Key('search_button'),
+          icon: Icon(viewModel.isSearching ? Icons.close : Icons.search),
+          onPressed: () {
+            final newSearching = !viewModel.isSearching;
+            viewModel.setIsSearching(newSearching);
+            if (!newSearching) {
+              _searchController.clear();
+            }
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTabBar(NotesViewModel viewModel) {
+    return Container(
+      color: Colors.white,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: List.generate(_tabs.length, (idx) {
+            final selected = viewModel.activeSubCategory == idx;
+            return Padding(
+              padding: EdgeInsets.only(
+                left: idx == 0 ? AppSpacing.lg : AppSpacing.sm,
+                right: idx == _tabs.length - 1 ? AppSpacing.lg : AppSpacing.sm,
+              ),
+              child: InkWell(
+                key: Key(_chipKeyForTab(_tabs[idx])),
+                onTap: () => viewModel.filterBySubCategory(idx),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _tabs[idx],
+                        style: TextStyle(
+                          fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                          color: selected ? AppColors.primary : Colors.grey,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        height: 3,
+                        width: selected ? 28 : 0,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorBanner(String message) {
+    return Container(
+      margin: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      color: Colors.red.shade100,
+      child: Text(
+        message,
+        style: TextStyle(color: Colors.red.shade900),
+      ),
+    );
+  }
+
+  Widget _buildNotesBody(NotesViewModel viewModel, List<Note> filteredNotes) {
+    if (viewModel.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (filteredNotes.isEmpty) {
+      return _buildEmptyState();
+    }
+    return ListView.builder(
+      padding: const EdgeInsets.only(
+        left: AppSpacing.lg,
+        right: AppSpacing.md,
+        top: AppSpacing.sm,
+        bottom: 24,
+      ),
+      itemCount: filteredNotes.length,
+      itemBuilder: (context, idx) => _buildNoteListItem(filteredNotes[idx], viewModel),
+    );
+  }
+
+  Widget _buildNoteListItem(Note note, NotesViewModel viewModel) {
+    final bool isPinned = note.isPinned;
+    final bool isFavourite = note.isFavourite;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: GestureDetector(
+        onTap: () {
+          ScaffoldMessenger.of(context).clearSnackBars();
+          Navigator.pushNamed(
+            context,
+            '/edit',
+            arguments: note,
+          );
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            color: isPinned ? AppColors.placeholder : Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (viewModel.activeSubCategory == 0) ...[
+                      buildCategoryBadge(note.category),
+                      const SizedBox(height: 14),
+                    ],
+                    Text(
+                      key: _semanticKeyForNoteTitle(note.title),
+                      note.title,
+                      style: AppTypography.h2,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      note.body,
+                      style: AppTypography.body2.copyWith(color: AppColors.textTertiary),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              if (isFavourite || isPinned) ...[
+                const SizedBox(width: 12),
+                _buildNoteActions(isFavourite, isPinned, note, viewModel),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNoteActions(bool isFavourite, bool isPinned, Note note, NotesViewModel viewModel) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (isFavourite)
+          GestureDetector(
+            key: const Key('favourite_button'),
+            onTap: () {
+              final provider = Provider.of<NotesViewModel>(context, listen: false);
+              provider.toggleFavouriteStatus(note.id);
+            },
+            child: const Padding(
+              padding: EdgeInsets.only(bottom: 4),
+              child: Icon(
+                Icons.star,
+                color: Colors.grey,
+                size: 22,
+              ),
+            ),
+          ),
+        if (isPinned)
+          GestureDetector(
+            key: const Key('pin_button'),
+            onTap: () {
+              final provider = Provider.of<NotesViewModel>(context, listen: false);
+              provider.togglePinStatus(note.id);
+            },
+            child: const Icon(
+              Icons.push_pin,
+              color: AppColors.secondary,
+              size: 20,
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildFab() {
+    return Semantics(
+      label: 'Create Note',
+      hint: 'Create a new note',
+      identifier: 'fab_create_note',
+      child: GestureDetector(
+        onTap: () {
+          ScaffoldMessenger.of(context).clearSnackBars();
+          Navigator.pushNamed(context, '/edit');
+        },
+        child: Container(
+          width: 60,
+          height: 60,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppColors.primary,
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.4),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: const Icon(Icons.add, size: 32, color: Colors.white),
         ),
       ),
     );

@@ -1,5 +1,32 @@
 import 'package:flutter/material.dart';
 
+/// Optional field overrides for [Note.copyWith] (single parameter keeps Sonar S107 happy).
+class NotePatch {
+  final String? id;
+  final String? title;
+  final String? body;
+  final String? category;
+  final String? colorHex;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+  final bool? isPinned;
+  final bool? isFavourite;
+  final String? imageUrl;
+
+  const NotePatch({
+    this.id,
+    this.title,
+    this.body,
+    this.category,
+    this.colorHex,
+    this.createdAt,
+    this.updatedAt,
+    this.isPinned,
+    this.isFavourite,
+    this.imageUrl,
+  });
+}
+
 class Note {
   String id;
   String title;
@@ -90,29 +117,18 @@ class Note {
     };
   }
 
-  Note copyWith({
-    String? id,
-    String? title,
-    String? body,
-    String? category,
-    String? colorHex,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    bool? isPinned,
-    bool? isFavourite,
-    String? imageUrl,
-  }) {
+  Note copyWith([NotePatch patch = const NotePatch()]) {
     return Note(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      body: body ?? this.body,
-      category: category ?? this.category,
-      colorHex: colorHex ?? this.colorHex,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-      isPinned: isPinned ?? this.isPinned,
-      isFavourite: isFavourite ?? this.isFavourite,
-      imageUrl: imageUrl ?? this.imageUrl,
+      id: patch.id ?? id,
+      title: patch.title ?? title,
+      body: patch.body ?? body,
+      category: patch.category ?? category,
+      colorHex: patch.colorHex ?? colorHex,
+      createdAt: patch.createdAt ?? createdAt,
+      updatedAt: patch.updatedAt ?? updatedAt,
+      isPinned: patch.isPinned ?? isPinned,
+      isFavourite: patch.isFavourite ?? isFavourite,
+      imageUrl: patch.imageUrl ?? imageUrl,
     );
   }
 }

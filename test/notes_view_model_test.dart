@@ -88,8 +88,10 @@ void main() {
 
     test('copyWith functionality', () {
       final updatedNote = testNote.copyWith(
-        title: 'Updated Title',
-        isPinned: true,
+        const NotePatch(
+          title: 'Updated Title',
+          isPinned: true,
+        ),
       );
       
       expect(updatedNote.title, 'Updated Title');

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
+
 import '../models/note_model.dart';
+import '../strings/app_strings.dart';
+import '../theme/colors.dart';
+import '../theme/typography.dart';
 import '../view_models/notes_view_model.dart';
 import '../widgets/delete_confirmation_dialog.dart';
-import 'package:uuid/uuid.dart';
-import '../theme/typography.dart';
-import '../theme/colors.dart';
-import '../strings/app_strings.dart';
 
 class EditNoteScreen extends StatefulWidget {
   final Note? note;
@@ -31,6 +32,8 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
   ];
   int _selectedCategory = 0;
 
+  static const Color _titleFieldColor = Color.fromRGBO(0, 0, 0, 0.7);
+
   @override
   void initState() {
     super.initState();
@@ -43,8 +46,8 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
       _selectedCategory = _categories.indexWhere((c) => c['name'] == note.category);
       if (_selectedCategory == -1) _selectedCategory = 0;
     }
-    _category = _categories[_selectedCategory]['name'];
-    _categoryColor = _categories[_selectedCategory]['color'];
+    _category = _categories[_selectedCategory]['name']! as String;
+    _categoryColor = _categories[_selectedCategory]['color']! as Color;
   }
 
   @override
@@ -55,7 +58,7 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
   }
 
   void _showDeleteConfirmation() {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -64,6 +67,16 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
         onCancel: () {},
       ),
     );
+  }
+
+  void _onMenuSelected(String value) {
+    if (value == 'pin') {
+      setState(() => _isPinned = !_isPinned);
+    } else if (value == 'favourite') {
+      setState(() => _isFavourite = !_isFavourite);
+    } else if (value == 'delete') {
+      _showDeleteConfirmation();
+    }
   }
 
   void _saveNote() {
@@ -85,13 +98,15 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
       provider.createNote(note);
     } else {
       final note = widget.note!.copyWith(
-        title: _titleController.text.trim(),
-        body: _bodyController.text.trim(),
-        category: _category,
-        colorHex: hexString,
-        updatedAt: now,
-        isPinned: _isPinned,
-        isFavourite: _isFavourite,
+        NotePatch(
+          title: _titleController.text.trim(),
+          body: _bodyController.text.trim(),
+          category: _category,
+          colorHex: hexString,
+          updatedAt: now,
+          isPinned: _isPinned,
+          isFavourite: _isFavourite,
+        ),
       );
       provider.updateNote(note);
     }
@@ -106,7 +121,7 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           duration: const Duration(seconds: 5),
-          content: Text(AppStrings.noteDeleted),
+          content: const Text(AppStrings.noteDeleted),
           action: SnackBarAction(
             label: AppStrings.undo,
             onPressed: () {
@@ -116,7 +131,6 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
         ),
       );
     } else {
-      // For unsaved new notes, just go back without saving
       Navigator.pop(context);
     }
   }
@@ -126,126 +140,14 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       extendBody: true,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(AppStrings.notes, style: TextStyle(fontWeight: FontWeight.bold)),
-        centerTitle: false,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-            child: ElevatedButton(
-              key: Key('save_note_button'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 0),
-              ),
-              onPressed: _saveNote,
-              child: Text(AppStrings.save, style: TextStyle(fontWeight: FontWeight.bold)),
-            ),
-          ),
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert, color: Colors.black54),
-            onSelected: (value) {
-              if (value == 'pin') {
-                setState(() {
-                  _isPinned = !_isPinned;
-                });
-              } else if (value == 'favourite') {
-                setState(() {
-                  _isFavourite = !_isFavourite;
-                });
-              } else if (value == 'delete') {
-                _showDeleteConfirmation();
-              }
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'pin',
-                child: Row(
-                  children: [
-                    Icon(_isPinned ? Icons.push_pin : Icons.push_pin_outlined, color: Colors.grey),
-                    const SizedBox(width: 8),
-                    Text(_isPinned ? AppStrings.unpinNote : AppStrings.pinNote),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: 'favourite',
-                child: Row(
-                  children: [
-                    Icon(_isFavourite ? Icons.star : Icons.star_border, color: Colors.grey),
-                    const SizedBox(width: 8),
-                    Text(_isFavourite ? AppStrings.unfavourite : AppStrings.markAsFavourite),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: 'delete',
-                child: Row(
-                  children: [
-                    const Icon(Icons.delete, color: Colors.red, size: 20),
-                    const SizedBox(width: 8),
-                    const Text(AppStrings.deleteNote, style: TextStyle(color: Colors.red)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+      appBar: _buildAppBar(),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: List.generate(_categories.length, (idx) {
-                  final bool selected = _selectedCategory == idx;
-                  final Color catColor = _categories[idx]['color'] as Color;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: ChoiceChip(
-                      label: Text(
-                        _categories[idx]['name'],
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: selected ? catColor : Colors.grey.shade300,
-                        ),
-                      ),
-                      selected: selected,
-                      selectedColor: Colors.white,
-                      backgroundColor: Colors.white,
-                      labelStyle: TextStyle(
-                        color: selected ? catColor : Colors.grey.shade300,
-                      ),
-                      showCheckmark: false,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        side: BorderSide(
-                          color: selected ? catColor : Colors.grey.shade300,
-                          width: 2,
-                        ),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      onSelected: (_) {
-                        setState(() {
-                          _selectedCategory = idx;
-                          _category = _categories[idx]['name'];
-                          _categoryColor = _categories[idx]['color'];
-                        });
-                      },
-                    ),
-                  );
-                }),
-              ),
-              ),
+              _buildCategoryChipsRow(),
               const SizedBox(height: 16),
               Text(
                 _formatDate(widget.note?.createdAt ?? DateTime.now()),
@@ -253,12 +155,17 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
               ),
               const SizedBox(height: 24),
               TextField(
-                key: Key('note_title_field'),
+                key: const Key('note_title_field'),
                 controller: _titleController,
-                style: AppTypography.h1.copyWith(fontStyle: FontStyle.italic, color: Color.fromRGBO(0, 0, 0, 0.7)),
+                style: AppTypography.h1.copyWith(fontStyle: FontStyle.italic, color: _titleFieldColor),
                 decoration: const InputDecoration(
                   hintText: AppStrings.title,
-                  hintStyle: TextStyle(fontStyle: FontStyle.italic, fontSize: 32, color: Colors.black26, fontWeight: FontWeight.bold),
+                  hintStyle: TextStyle(
+                    fontStyle: FontStyle.italic,
+                    fontSize: 32,
+                    color: Colors.black26,
+                    fontWeight: FontWeight.bold,
+                  ),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.zero,
                 ),
@@ -267,7 +174,7 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
               const SizedBox(height: 8),
               Expanded(
                 child: TextField(
-                  key: Key('note_body_field'),
+                  key: const Key('note_body_field'),
                   controller: _bodyController,
                   style: AppTypography.body1.copyWith(color: Colors.black87),
                   decoration: const InputDecoration(
@@ -287,6 +194,114 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
     );
   }
 
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () => Navigator.pop(context),
+      ),
+      title: const Text(AppStrings.notes, style: TextStyle(fontWeight: FontWeight.bold)),
+      centerTitle: false,
+      actions: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+          child: ElevatedButton(
+            key: const Key('save_note_button'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 0),
+            ),
+            onPressed: _saveNote,
+            child: const Text(AppStrings.save, style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ),
+        PopupMenuButton<String>(
+          icon: const Icon(Icons.more_vert, color: Colors.black54),
+          onSelected: _onMenuSelected,
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              value: 'pin',
+              child: Row(
+                children: [
+                  Icon(_isPinned ? Icons.push_pin : Icons.push_pin_outlined, color: Colors.grey),
+                  const SizedBox(width: 8),
+                  Text(_isPinned ? AppStrings.unpinNote : AppStrings.pinNote),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: 'favourite',
+              child: Row(
+                children: [
+                  Icon(_isFavourite ? Icons.star : Icons.star_border, color: Colors.grey),
+                  const SizedBox(width: 8),
+                  Text(_isFavourite ? AppStrings.unfavourite : AppStrings.markAsFavourite),
+                ],
+              ),
+            ),
+            const PopupMenuItem(
+              value: 'delete',
+              child: Row(
+                children: [
+                  Icon(Icons.delete, color: Colors.red, size: 20),
+                  SizedBox(width: 8),
+                  Text(AppStrings.deleteNote, style: TextStyle(color: Colors.red)),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCategoryChipsRow() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: List.generate(_categories.length, (idx) {
+          final bool selected = _selectedCategory == idx;
+          final Color catColor = _categories[idx]['color']! as Color;
+          return Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: ChoiceChip(
+              label: Text(
+                _categories[idx]['name']! as String,
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: selected ? catColor : Colors.grey.shade300,
+                ),
+              ),
+              selected: selected,
+              selectedColor: Colors.white,
+              backgroundColor: Colors.white,
+              labelStyle: TextStyle(
+                color: selected ? catColor : Colors.grey.shade300,
+              ),
+              showCheckmark: false,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+                side: BorderSide(
+                  color: selected ? catColor : Colors.grey.shade300,
+                  width: 2,
+                ),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              onSelected: (_) {
+                setState(() {
+                  _selectedCategory = idx;
+                  _category = _categories[idx]['name']! as String;
+                  _categoryColor = _categories[idx]['color']! as Color;
+                });
+              },
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
   Widget _buildFormattingToolbar() {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -294,7 +309,7 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: Colors.black12,
             blurRadius: 4,
@@ -341,7 +356,6 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
   }
 
   String _formatDate(DateTime date) {
-    // Example: OCTOBER 24, 2023
     return '${AppStrings.months[date.month - 1]} ${date.day}, ${date.year}';
   }
 }

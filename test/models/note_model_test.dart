@@ -77,8 +77,10 @@ void main() {
       );
 
       final updated = note.copyWith(
-        title: 'New Title',
-        isPinned: true,
+        const NotePatch(
+          title: 'New Title',
+          isPinned: true,
+        ),
       );
 
       expect(updated.id, '1');
