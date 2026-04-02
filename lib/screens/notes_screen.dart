@@ -266,6 +266,7 @@ class _NotesScreenState extends State<NotesScreen> {
                               padding: const EdgeInsets.symmetric(vertical: 8),
                               child: GestureDetector(
                                 onTap: () {
+                                  ScaffoldMessenger.of(context).clearSnackBars();
                                   Navigator.pushNamed(
                                     context,
                                     '/edit',
@@ -379,6 +380,7 @@ class _NotesScreenState extends State<NotesScreen> {
         identifier: "fab_create_note",
         child: GestureDetector(
           onTap: () {
+            ScaffoldMessenger.of(context).clearSnackBars();
             Navigator.pushNamed(context, '/edit');
           },
           child: Container(
