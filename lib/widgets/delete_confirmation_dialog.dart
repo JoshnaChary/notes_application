@@ -50,6 +50,7 @@ class DeleteConfirmationDialog extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
+              key: Key('delete_button'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.error,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
@@ -67,6 +68,7 @@ class DeleteConfirmationDialog extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
+              key: Key('confirm_delete_button'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.placeholder,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),

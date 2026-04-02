@@ -301,6 +301,11 @@ class _NotesScreenState extends State<NotesScreen> {
                                             ],
                                             // Line 2: Title
                                             Text(
+                                              key: note.title.contains("Favourite") 
+                                                ? Key('favourite_test_note')
+                                                : note.title.contains("Pinned")
+                                                    ? Key('pinned_test_note')
+                                                    : null,
                                               note.title,
                                               style: AppTypography.h2,
                                               maxLines: 1,
@@ -368,26 +373,30 @@ class _NotesScreenState extends State<NotesScreen> {
           ],
         ),
       ),
-      floatingActionButton: GestureDetector(
-        key: Key('fab_create_note'),
-        onTap: () {
-          Navigator.pushNamed(context, '/edit');
-        },
-        child: Container(
-          width: 60,
-          height: 60,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: AppColors.primary,
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.4),
-                blurRadius: 12,
-                offset: const Offset(0, 6),
-              ),
-            ],
+      floatingActionButton: Semantics(
+        label: "Create Note",
+        hint: "Create a new note",
+        identifier: "fab_create_note",
+        child: GestureDetector(
+          onTap: () {
+            Navigator.pushNamed(context, '/edit');
+          },
+          child: Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.primary,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withValues(alpha: 0.4),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: const Icon(Icons.add, size: 32, color: Colors.white),
           ),
-          child: const Icon(Icons.add, size: 32, color: Colors.white),
         ),
       ),
     );
