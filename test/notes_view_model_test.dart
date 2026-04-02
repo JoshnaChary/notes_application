@@ -1,7 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:notes_application/models/note_model.dart';
+import 'package:notes_application/core/config/app_config.dart';
 import 'package:notes_application/view_models/notes_view_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class FakeNote extends Fake implements Note {}
 
@@ -20,7 +23,20 @@ void main() {
     isFavourite: false,
   );
 
-  setUpAll(() {
+  setUpAll(() async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+
+    // NotesViewModel reads Supabase.instance.client in its constructor, so we
+    // must initialize Supabase in tests as well.
+    try {
+      await Supabase.initialize(
+        url: AppConfig.supabaseUrl,
+        anonKey: AppConfig.supabaseAnonKey,
+      );
+    } catch (_) {
+      // Ignore if already initialized (e.g., when tests are run multiple times).
+    }
     registerFallbackValue(FakeNote());
   });
 
