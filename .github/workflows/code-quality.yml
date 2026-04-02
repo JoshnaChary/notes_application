@@ -1,0 +1,56 @@
+name: Code Quality
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Flutter Quality and Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          channel: stable
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Static analysis
+        run: flutter analyze
+
+      - name: Run tests with coverage
+        run: flutter test --coverage
+
+      - name: Install lcov
+        run: sudo apt-get update && sudo apt-get install -y lcov
+
+      - name: Clean coverage report
+        run: lcov --remove coverage/lcov.info 'lib/generated/*' -o coverage/lcov.info
+
+      - name: Install Qlty
+        run: |
+          curl -fsSL https://qlty.sh | bash
+          echo "$HOME/.qlty/bin" >> "$GITHUB_PATH"
+
+      - name: Run Qlty checks
+        run: qlty check
+
+      - name: Upload coverage to Code Climate
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        run: |
+          curl -fsSL https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 -o cc-test-reporter
+          chmod +x cc-test-reporter
+          ./cc-test-reporter format-coverage -t lcov coverage/lcov.info -o coverage/codeclimate.json
+          ./cc-test-reporter upload-coverage -i coverage/codeclimate.json

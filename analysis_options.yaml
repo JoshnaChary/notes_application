@@ -1,1 +1,14 @@
 include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "build/**"
+
+linter:
+  rules:
+    avoid_relative_lib_imports: true
+    prefer_final_fields: true
+    prefer_final_locals: true
+    use_key_in_widget_constructors: true
