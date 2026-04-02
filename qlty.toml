@@ -1,0 +1,38 @@
+config_version = "0"
+
+exclude_patterns = [
+  "**/build/**",
+  "**/generated/**",
+  "**/.dart_tool/**",
+  "**/ios/**",
+  "**/android/**",
+  "**/test/**",
+]
+
+test_patterns = [
+  "**/test/**",
+  "**/*_test.dart",
+]
+
+[smells]
+mode = "comment"
+
+[[source]]
+name = "default"
+default = true
+
+[[plugin]]
+name = "actionlint"
+
+[[plugin]]
+name = "osv-scanner"
+
+[[plugin]]
+name = "ripgrep"
+mode = "comment"
+
+[[plugin]]
+name = "trufflehog"
+
+[[plugin]]
+name = "zizmor"

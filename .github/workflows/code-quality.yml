@@ -1,0 +1,67 @@
+name: Code Quality
+
+on:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Flutter Quality and Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          channel: stable
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Static analysis
+        run: flutter analyze
+
+      - name: Run tests with coverage
+        run: flutter test --coverage
+
+      - name: Install lcov
+        run: sudo apt-get update && sudo apt-get install -y lcov
+
+      - name: Clean coverage report
+        run: |
+          lcov --remove coverage/lcov.info 'lib/generated/*' -o coverage/lcov.info --ignore-errors unused || true
+          test -f coverage/lcov.info
+
+      - name: Install Qlty
+        run: |
+          curl -fsSL https://qlty.sh | bash
+          echo "$HOME/.qlty/bin" >> "$GITHUB_PATH"
+
+      - name: Run Qlty checks
+        run: qlty check
+
+      - name: Verify Qlty coverage token presence
+        if: github.event_name == 'push'
+        env:
+          QLTY_COVERAGE_TOKEN: ${{ secrets.QLTY_COVERAGE_TOKEN }}
+        run: |
+          if [ -z "$QLTY_COVERAGE_TOKEN" ]; then
+            echo "QLTY_COVERAGE_TOKEN is missing"
+            exit 1
+          fi
+          echo "QLTY_COVERAGE_TOKEN is available"
+
+      - name: Upload coverage to Qlty
+        if: github.event_name == 'push'
+        env:
+          QLTY_COVERAGE_TOKEN: ${{ secrets.QLTY_COVERAGE_TOKEN }}
+        run: |
+          test -f coverage/lcov.info
+          qlty coverage publish coverage/lcov.info

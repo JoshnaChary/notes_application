@@ -1,0 +1,9 @@
+version: "2"
+plugins:
+  duplication:
+    enabled: true
+exclude_patterns:
+  - "build/"
+  - "ios/"
+  - "android/"
+  - "test/"
