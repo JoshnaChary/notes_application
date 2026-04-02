@@ -2,7 +2,6 @@ name: Code Quality
 
 on:
   push:
-  pull_request:
 
 permissions:
   contents: read
@@ -48,7 +47,19 @@ jobs:
       - name: Run Qlty checks
         run: qlty check
 
+      - name: Verify Qlty coverage token presence
+        if: github.event_name == 'push'
+        env:
+          QLTY_COVERAGE_TOKEN: ${{ secrets.QLTY_COVERAGE_TOKEN }}
+        run: |
+          if [ -z "$QLTY_COVERAGE_TOKEN" ]; then
+            echo "QLTY_COVERAGE_TOKEN is missing"
+            exit 1
+          fi
+          echo "QLTY_COVERAGE_TOKEN is available"
+
       - name: Upload coverage to Qlty
+        if: github.event_name == 'push'
         env:
           QLTY_COVERAGE_TOKEN: ${{ secrets.QLTY_COVERAGE_TOKEN }}
         run: |
