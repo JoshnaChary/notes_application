@@ -45,16 +45,16 @@ std::string Utf8FromUtf16(const wchar_t* utf16_string) {
   if (utf16_string == nullptr) {
     return std::string();
   }
+  std::string utf8_string;
+
+  // Compute length right after the null guard so the null-check is proven
+  // at the wcslen() call site.
+  int input_length = (int)wcslen(utf16_string);
+
   auto target_length = ::WideCharToMultiByte(
       CP_UTF8, WC_ERR_INVALID_CHARS, utf16_string,
       -1, nullptr, 0, nullptr, nullptr)
     -1; // remove the trailing null character
-  // Sonar rule: wcslen() does not guard null; keep an explicit guard nearby.
-  if (utf16_string == nullptr) {
-    return std::string();
-  }
-  int input_length = (int)wcslen(utf16_string);
-  std::string utf8_string;
   if (target_length == 0 || target_length > utf8_string.max_size()) {
     return utf8_string;
   }
