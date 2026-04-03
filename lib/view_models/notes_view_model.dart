@@ -22,7 +22,11 @@ class NotesViewModel extends ChangeNotifier {
   int _activeSubCategory = 0; // 0: ALL, 1: PERSONAL, 2: WORK, 3: URGENT, 4: PEACE
 
   // Constructor
-  NotesViewModel() {
+  NotesViewModel({SupabaseClient? supabaseClient}) {
+    if (supabaseClient != null) {
+      _supabase = supabaseClient;
+      return;
+    }
     // Initialize Supabase with error handling
     try {
       _supabase = Supabase.instance.client;
