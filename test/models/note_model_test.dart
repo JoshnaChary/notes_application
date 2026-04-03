@@ -3,6 +3,24 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:notes_application/models/note_model.dart';
 
 void main() {
+  group('NotePatch', () {
+    test('empty patch leaves note unchanged', () {
+      final now = DateTime(2026, 1, 1);
+      final note = Note(
+        id: '1',
+        title: 'A',
+        body: 'B',
+        category: 'WORK',
+        colorHex: '#000000',
+        createdAt: now,
+        updatedAt: now,
+      );
+      final same = note.copyWith();
+      expect(same.title, 'A');
+      expect(identical(same, note), false);
+    });
+  });
+
   group('Note', () {
     test('creates note with valid data', () {
       final now = DateTime(2026, 1, 1, 12);
@@ -77,8 +95,10 @@ void main() {
       );
 
       final updated = note.copyWith(
-        title: 'New Title',
-        isPinned: true,
+        const NotePatch(
+          title: 'New Title',
+          isPinned: true,
+        ),
       );
 
       expect(updated.id, '1');
