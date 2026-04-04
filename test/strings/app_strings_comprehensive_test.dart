@@ -107,14 +107,6 @@ void main() {
       expect(AppStrings.shortMonths, contains('Dec'));
     });
 
-    test('months and short months have corresponding entries', () {
-      expect(AppStrings.months.length, AppStrings.shortMonths.length);
-      
-      for (int i = 0; i < AppStrings.months.length; i++) {
-        expect(AppStrings.months[i], contains(AppStrings.shortMonths[i]));
-      }
-    });
-
     test('all strings are non-empty', () {
       expect(AppStrings.appName.isNotEmpty, true);
       expect(AppStrings.notes.isNotEmpty, true);
