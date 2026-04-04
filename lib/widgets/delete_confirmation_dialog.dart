@@ -18,10 +18,10 @@ class DeleteConfirmationDialog extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: const [
+        borderRadius: BorderRadius.all(Radius.circular(28)),
+        boxShadow: [
           BoxShadow(
             color: Colors.black12,
             blurRadius: 16,
@@ -35,9 +35,9 @@ class DeleteConfirmationDialog extends StatelessWidget {
           Container(
             width: 56,
             height: 56,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.placeholder,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.all(Radius.circular(16)),
             ),
             child: const Icon(Icons.delete_forever, color: AppColors.error, size: 32),
           ),

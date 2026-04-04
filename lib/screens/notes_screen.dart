@@ -111,17 +111,21 @@ class _NotesScreenState extends State<NotesScreen> {
       backgroundColor: const Color(0xFFF0F2F5),
       drawer: _buildDrawer(viewModel),
       appBar: _buildAppBar(viewModel),
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildTabBar(viewModel),
-            if (viewModel.errorMessage != null) _buildErrorBanner(viewModel.errorMessage!),
-            Expanded(child: _buildNotesBody(viewModel, filteredNotes)),
-          ],
-        ),
-      ),
+      body: _buildBody(viewModel, filteredNotes),
       floatingActionButton: _buildFab(),
+    );
+  }
+
+  Widget _buildBody(NotesViewModel viewModel, List<Note> filteredNotes) {
+    return SafeArea(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildTabBar(viewModel),
+          if (viewModel.errorMessage != null) _buildErrorBanner(viewModel.errorMessage!),
+          Expanded(child: _buildNotesBody(viewModel, filteredNotes)),
+        ],
+      ),
     );
   }
 
@@ -175,25 +179,13 @@ class _NotesScreenState extends State<NotesScreen> {
   }
 
   PreferredSizeWidget _buildAppBar(NotesViewModel viewModel) {
+    final title = _buildAppBarTitle(viewModel);
+    final centerTitle = !viewModel.isSearching;
+    
     return AppBar(
       backgroundColor: Colors.white,
-      title: viewModel.isSearching
-          ? TextField(
-              controller: _searchController,
-              autofocus: true,
-              decoration: InputDecoration(
-                hintText: AppStrings.searchNotes,
-                border: InputBorder.none,
-                hintStyle: AppTypography.hint,
-              ),
-              style: AppTypography.body1.copyWith(
-                color: AppColors.textPrimary,
-                fontSize: 18,
-              ),
-              onChanged: viewModel.setSearchQuery,
-            )
-          : Text(AppStrings.appName, style: AppTypography.h2),
-      centerTitle: !viewModel.isSearching,
+      title: title,
+      centerTitle: centerTitle,
       actions: [
         IconButton(
           key: const Key('search_button'),
@@ -203,11 +195,31 @@ class _NotesScreenState extends State<NotesScreen> {
             viewModel.setIsSearching(newSearching);
             if (!newSearching) {
               _searchController.clear();
+              viewModel.setSearchQuery('');
             }
           },
         ),
       ],
     );
+  }
+
+  Widget _buildAppBarTitle(NotesViewModel viewModel) {
+    return viewModel.isSearching
+        ? TextField(
+            controller: _searchController,
+            autofocus: true,
+            decoration: InputDecoration(
+              hintText: AppStrings.searchNotes,
+              border: InputBorder.none,
+              hintStyle: AppTypography.hint,
+            ),
+            style: AppTypography.body1.copyWith(
+              color: AppColors.textPrimary,
+              fontSize: 18,
+            ),
+            onChanged: viewModel.setSearchQuery,
+          )
+        : Text(AppStrings.appName, style: AppTypography.h2);
   }
 
   Widget _buildTabBar(NotesViewModel viewModel) {
@@ -217,46 +229,56 @@ class _NotesScreenState extends State<NotesScreen> {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: List.generate(_tabs.length, (idx) {
-            final selected = viewModel.activeSubCategory == idx;
-            return Padding(
-              padding: EdgeInsets.only(
-                left: idx == 0 ? AppSpacing.lg : AppSpacing.sm,
-                right: idx == _tabs.length - 1 ? AppSpacing.lg : AppSpacing.sm,
-              ),
-              child: InkWell(
-                key: Key(_chipKeyForTab(_tabs[idx])),
-                onTap: () => viewModel.filterBySubCategory(idx),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        _tabs[idx],
-                        style: TextStyle(
-                          fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-                          color: selected ? AppColors.primary : Colors.grey,
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 180),
-                        height: 3,
-                        width: selected ? 28 : 0,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
+            return _buildTabChip(viewModel, idx);
           }),
         ),
       ),
+    );
+  }
+
+  Widget _buildTabChip(NotesViewModel viewModel, int idx) {
+    final selected = viewModel.activeSubCategory == idx;
+    final padding = _getTabPadding(idx);
+    
+    return Padding(
+      padding: padding,
+      child: InkWell(
+        key: Key(_chipKeyForTab(_tabs[idx])),
+        onTap: () => viewModel.filterBySubCategory(idx),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                _tabs[idx],
+                style: TextStyle(
+                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                  color: selected ? AppColors.primary : Colors.grey,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 4),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                height: 3,
+                width: selected ? 28 : 0,
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  EdgeInsets _getTabPadding(int idx) {
+    return EdgeInsets.only(
+      left: idx == 0 ? AppSpacing.lg : AppSpacing.sm,
+      right: idx == _tabs.length - 1 ? AppSpacing.lg : AppSpacing.sm,
     );
   }
 

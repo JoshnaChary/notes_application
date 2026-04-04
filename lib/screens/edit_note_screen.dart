@@ -32,7 +32,7 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
   ];
   int _selectedCategory = 0;
 
-  static const Color _titleFieldColor = Color.fromRGBO(0, 0, 0, 0.7);
+  static final Color _titleFieldColor = Color.fromRGBO(0, 0, 0, 0.7);
 
   @override
   void initState() {
