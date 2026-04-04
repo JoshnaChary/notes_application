@@ -1,0 +1,66 @@
+{"protocolVersion":"0.1.1","runnerVersion":null,"pid":47362,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"/Users/joshnaramojipally/Flutter Projects/notes_application/test/strings/app_strings_comprehensive_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading /Users/joshnaramojipally/Flutter Projects/notes_application/test/strings/app_strings_comprehensive_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":0}
+{"suite":{"id":2,"platform":"vm","path":"/Users/joshnaramojipally/Flutter Projects/notes_application/test/strings/app_strings_test.dart"},"type":"suite","time":2}
+{"test":{"id":3,"name":"loading /Users/joshnaramojipally/Flutter Projects/notes_application/test/strings/app_strings_test.dart","suiteID":2,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":2}
+{"suite":{"id":4,"platform":"vm","path":"/Users/joshnaramojipally/Flutter Projects/notes_application/test/core/config/app_config_test.dart"},"type":"suite","time":2}
+{"test":{"id":5,"name":"loading /Users/joshnaramojipally/Flutter Projects/notes_application/test/core/config/app_config_test.dart","suiteID":4,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":2}
+{"suite":{"id":6,"platform":"vm","path":"/Users/joshnaramojipally/Flutter Projects/notes_application/test/repositories/notes_repository_comprehensive_test.dart"},"type":"suite","time":2}
+{"test":{"id":7,"name":"loading /Users/joshnaramojipally/Flutter Projects/notes_application/test/repositories/notes_repository_comprehensive_test.dart","suiteID":6,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":2}
+{"suite":{"id":8,"platform":"vm","path":"/Users/joshnaramojipally/Flutter Projects/notes_application/test/repositories/notes_repository_test.dart"},"type":"suite","time":2}
+{"test":{"id":9,"name":"loading /Users/joshnaramojipally/Flutter Projects/notes_application/test/repositories/notes_repository_test.dart","suiteID":8,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":2}
+{"suite":{"id":10,"platform":"vm","path":"/Users/joshnaramojipally/Flutter Projects/notes_application/test/models/note_model_test.dart"},"type":"suite","time":3}
+{"test":{"id":11,"name":"loading /Users/joshnaramojipally/Flutter Projects/notes_application/test/models/note_model_test.dart","suiteID":10,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":3}
+{"count":21,"time":3,"type":"allSuites"}
+test/repositories/notes_repository_comprehensive_test.dart:9:57: Error: Type 'SupabaseFilterBuilder' not found.
+class MockSupabaseFilterBuilder extends Mock implements SupabaseFilterBuilder {}
+                                                        ^^^^^^^^^^^^^^^^^^^^^
+test/repositories/notes_repository_comprehensive_test.dart:49:63: Error: The argument type 'MockSupabaseFilterBuilder' can't be assigned to the parameter type 'PostgrestFilterBuilder<dynamic>'.
+ - 'MockSupabaseFilterBuilder' is from 'test/repositories/notes_repository_comprehensive_test.dart'.
+ - 'PostgrestFilterBuilder' is from 'package:postgrest/src/postgrest_builder.dart' ('../../.pub-cache/hosted/pub.dev/postgrest-2.6.0/lib/src/postgrest_builder.dart').
+        when(() => mockQueryBuilder.insert(any())).thenReturn(mockFilterBuilder);
+                                                              ^
+test/repositories/notes_repository_comprehensive_test.dart:50:38: Error: The method 'select' isn't defined for the type 'MockSupabaseFilterBuilder'.
+ - 'MockSupabaseFilterBuilder' is from 'test/repositories/notes_repository_comprehensive_test.dart'.
+Try correcting the name to the name of an existing method, or defining a method named 'select'.
+        when(() => mockFilterBuilder.select()).thenReturn(mockFilterBuilder);
+                                     ^^^^^^
+test/repositories/notes_repository_comprehensive_test.dart:51:38: Error: The method 'single' isn't defined for the type 'MockSupabaseFilterBuilder'.
+ - 'MockSupabaseFilterBuilder' is from 'test/repositories/notes_repository_comprehensive_test.dart'.
+Try correcting the name to the name of an existing method, or defining a method named 'single'.
+        when(() => mockFilterBuilder.single()).thenReturn({
+                                     ^^^^^^
+test/repositories/notes_repository_comprehensive_test.dart:63:40: Error: The method 'select' isn't defined for the type 'MockSupabaseFilterBuilder'.
+ - 'MockSupabaseFilterBuilder' is from 'test/repositories/notes_repository_comprehensive_test.dart'.
+Try correcting the name to the name of an existing method, or defining a method named 'select'.
+        verify(() => mockFilterBuilder.select()).called(1);
+                                       ^^^^^^
+test/repositories/notes_repository_comprehensive_test.dart:64:40: Error: The method 'single' isn't defined for the type 'MockSupabaseFilterBuilder'.
+ - 'MockSupabaseFilterBuilder' is from 'test/repositories/notes_repository_comprehensive_test.dart'.
+Try correcting the name to the name of an existing method, or defining a method named 'single'.
+        verify(() => mockFilterBuilder.single()).called(1);
+                                       ^^^^^^
+test/repositories/notes_repository_comprehensive_test.dart:75:58: Error: The argument type 'MockSupabaseFilterBuilder' can't be assigned to the parameter type 'PostgrestFilterBuilder<List<Map<String, dynamic>>>'.
+ - 'MockSupabaseFilterBuilder' is from 'test/repositories/notes_repository_comprehensive_test.dart'.
+ - 'PostgrestFilterBuilder' is from 'package:postgrest/src/postgrest_builder.dart' ('../../.pub-cache/hosted/pub.dev/postgrest-2.6.0/lib/src/postgrest_builder.dart').
+ - 'List' is from 'dart:core'.
+ - 'Map' is from 'dart:core'.
+        when(() => mockQueryBuilder.select()).thenReturn(mockFilterBuilder);
+                                                         ^
+test/repositories/notes_repository_comprehensive_test.dart:76:38: Error: The method 'eq' isn't defined for the type 'MockSupabaseFilterBuilder'.
+ - 'MockSupabaseFilterBuilder' is from 'test/repositories/notes_repository_comprehensive_test.dart'.
+Try correcting the name to the name of an existing method, or defining a method named 'eq'.
+        when(() => mockFilterBuilder.eq('user_id', any())).thenReturn(mockFilterBuilder);
+                                     ^^
+test/repositories/notes_repository_comprehensive_test.dart:77:38: Error: The method 'order' isn't defined for the type 'MockSupabaseFilterBuilder'.
+ - 'MockSupabaseFilterBuilder' is from 'test/repositories/notes_repository_comprehensive_test.dart'.
+Try correcting the name to the name of an existing method, or defining a method named 'order'.
+        when(() => mockFilterBuilder.order('created_at', ascending: false)).thenReturn(mockFilterBuilder);
+                                     ^^^^^
+test/repositories/notes_repository_comprehensive_test.dart:78:14: Error: The argument type 'MockSupabaseFilterBuilder' can't be assigned to the parameter type 'dynamic Function()'.
+ - 'MockSupabaseFilterBuilder' is from 'test/repositories/notes_repository_comprehensive_test.dart'.
+        when(mockFilterBuilder).thenReturn([
+             ^
+test/repositories/notes_repository_comprehensive_test.dart:85:40: Error: The method 'eq' isn't defined for the type 'MockSupabaseFilterBuilder'.
+ - 'MockSupabaseFilterBuilder' is from 'test/repositories/notes_repository_comprehensive_test.dart'.
+Try correcting the name to the name of an existing method, or defining a method named 'eq'.
