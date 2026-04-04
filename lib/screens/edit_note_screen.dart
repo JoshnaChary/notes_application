@@ -32,7 +32,7 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
   ];
   int _selectedCategory = 0;
 
-  static const Color _titleFieldColor = Color.fromRGBO(0, 0, 0, 0.7);
+  static final Color _titleFieldColor = Color.fromRGBO(0, 0, 0, 0.7);
 
   @override
   void initState() {
@@ -141,70 +141,56 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
       resizeToAvoidBottomInset: true,
       extendBody: true,
       appBar: _buildAppBar(),
-      body: _buildBody(),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildCategoryChipsRow(),
+              const SizedBox(height: 16),
+              Text(
+                _formatDate(widget.note?.createdAt ?? DateTime.now()),
+                style: const TextStyle(fontSize: 15, color: Colors.black54, letterSpacing: 1.1),
+              ),
+              const SizedBox(height: 24),
+              TextField(
+                key: const Key('note_title_field'),
+                controller: _titleController,
+                style: AppTypography.h1.copyWith(fontStyle: FontStyle.italic, color: _titleFieldColor),
+                decoration: const InputDecoration(
+                  hintText: AppStrings.title,
+                  hintStyle: TextStyle(
+                    fontStyle: FontStyle.italic,
+                    fontSize: 32,
+                    color: Colors.black26,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
+                ),
+                maxLines: 1,
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: TextField(
+                  key: const Key('note_body_field'),
+                  controller: _bodyController,
+                  style: AppTypography.body1.copyWith(color: Colors.black87),
+                  decoration: const InputDecoration(
+                    hintText: AppStrings.startWriting,
+                    hintStyle: TextStyle(color: Colors.black26, fontStyle: FontStyle.italic, fontSize: 20),
+                    border: InputBorder.none,
+                  ),
+                  maxLines: null,
+                  expands: true,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
       bottomNavigationBar: _buildFormattingToolbar(),
-    );
-  }
-
-  Widget _buildBody() {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildCategoryChipsRow(),
-            const SizedBox(height: 16),
-            _buildDateText(),
-            const SizedBox(height: 24),
-            _buildTitleField(),
-            const SizedBox(height: 8),
-            _buildBodyField(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDateText() {
-    return Text(
-      _formatDate(widget.note?.createdAt ?? DateTime.now()),
-      style: const TextStyle(fontSize: 15, color: Colors.black54, letterSpacing: 1.1),
-    );
-  }
-
-  Widget _buildTitleField() {
-    return TextField(
-      key: const Key('note_title_field'),
-      controller: _titleController,
-      style: AppTypography.h1.copyWith(fontStyle: FontStyle.italic, color: _titleFieldColor),
-      decoration: const InputDecoration(
-        hintText: AppStrings.title,
-        hintStyle: TextStyle(
-          fontStyle: FontStyle.italic,
-          fontSize: 32,
-          color: Colors.black26,
-          fontWeight: FontWeight.bold,
-        ),
-        border: InputBorder.none,
-        contentPadding: EdgeInsets.zero,
-      ),
-      maxLines: 1,
-    );
-  }
-
-  Widget _buildBodyField() {
-    return TextField(
-      key: const Key('note_body_field'),
-      controller: _bodyController,
-      style: AppTypography.body1.copyWith(color: Colors.black87),
-      decoration: const InputDecoration(
-        hintText: AppStrings.startWriting,
-        hintStyle: TextStyle(color: Colors.black26, fontStyle: FontStyle.italic, fontSize: 20),
-        border: InputBorder.none,
-      ),
-      maxLines: null,
-      expands: true,
     );
   }
 
