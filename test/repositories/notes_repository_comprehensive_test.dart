@@ -1,10 +1,28 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notes_application/repositories/notes_repository.dart';
 import 'package:notes_application/models/note_model.dart';
+import 'package:notes_application/core/config/app_config.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   group('NotesRepository Tests', () {
     late NotesRepository repository;
+
+    setUpAll(() async {
+      // Mock SharedPreferences for tests
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      
+      // Initialize Supabase for tests that use Supabase.instance.client
+      try {
+        await Supabase.initialize(
+          url: AppConfig.supabaseUrl,
+          anonKey: AppConfig.supabaseAnonKey,
+        );
+      } catch (_) {
+        // Ignore if already initialized
+      }
+    });
 
     setUp(() {
       repository = NotesRepository();
