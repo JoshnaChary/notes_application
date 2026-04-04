@@ -38,8 +38,12 @@ class AppStrings {
   static const String deleteNote = 'Delete Note';
   
   // Delete Confirmation
+  static const String deleteTitle = 'Delete Note';
+  static const String deleteMessage = 'Are you sure you want to delete this note?';
+  static const String deleteConfirm = 'DELETE';
+  static const String deleteCancel = 'CANCEL';
   static const String deleteThisNote = 'Delete this note?';
-  static const String deleteConfirmation = 'Are you sure you want to delete this note? This action cannot be undone and the content will be permanently removed.';
+  static const String deleteConfirmation = 'Are you sure you want to delete this note? This action cannot be undone and content will be permanently removed.';
   static const String cancel = 'Cancel';
   static const String delete = 'Delete Note';
   
@@ -57,8 +61,8 @@ class AppStrings {
   
   // Date Formatting
   static const List<String> months = [
-    'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
-    'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'
+    'JANUARY Jan', 'FEBRUARY Feb', 'MARCH Mar', 'APRIL Apr', 'MAY May', 'JUNE Jun',
+    'JULY Jul', 'AUGUST Aug', 'SEPTEMBER Sep', 'OCTOBER Oct', 'NOVEMBER Nov', 'DECEMBER Dec'
   ];
   
   static const List<String> shortMonths = [
