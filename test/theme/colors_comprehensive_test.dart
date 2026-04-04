@@ -79,20 +79,20 @@ void main() {
     });
 
     test('all colors are non-transparent', () {
-      expect(AppColors.primary.opacity, equals(1.0));
-      expect(AppColors.background.opacity, equals(1.0));
-      expect(AppColors.surface.opacity, equals(1.0));
-      expect(AppColors.textPrimary.opacity, equals(1.0));
-      expect(AppColors.error.opacity, equals(1.0));
+      expect(AppColors.primary.a, equals(1.0));
+      expect(AppColors.background.a, equals(1.0));
+      expect(AppColors.surface.a, equals(1.0));
+      expect(AppColors.textPrimary.a, equals(1.0));
+      expect(AppColors.error.a, equals(1.0));
     });
 
     test('color hex values are correct', () {
-      expect(AppColors.primary.value, 0xFF2D5BE3);
-      expect(AppColors.primaryDark.value, 0xFF1E3F9D);
-      expect(AppColors.secondary.value, 0xFF82B1FF);
-      expect(AppColors.background.value, 0xFFEEF0F3);
-      expect(AppColors.error.value, 0xFFB71C1C);
-      expect(AppColors.success.value, 0xFF2E7D32);
+      expect(AppColors.primary.toARGB32(), 0xFF2D5BE3);
+      expect(AppColors.primaryDark.toARGB32(), 0xFF1E3F9D);
+      expect(AppColors.secondary.toARGB32(), 0xFF82B1FF);
+      expect(AppColors.background.toARGB32(), 0xFFEEF0F3);
+      expect(AppColors.error.toARGB32(), 0xFFB71C1C);
+      expect(AppColors.success.toARGB32(), 0xFF2E7D32);
     });
 
     test('border colors follow expected pattern', () {
