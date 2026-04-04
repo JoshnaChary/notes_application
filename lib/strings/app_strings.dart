@@ -61,8 +61,8 @@ class AppStrings {
   
   // Date Formatting
   static const List<String> months = [
-    'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
-    'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'
+    'JANUARY', 'FEBRUARY Feb', 'MARCH Mar', 'APRIL Apr', 'MAY May', 'JUNE Jun',
+    'JULY Jul', 'AUGUST Aug', 'SEPTEMBER Sep', 'OCTOBER Oct', 'NOVEMBER Nov', 'DECEMBER'
   ];
   
   static const List<String> shortMonths = [
