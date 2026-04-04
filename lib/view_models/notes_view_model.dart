@@ -207,7 +207,7 @@ class NotesViewModel extends ChangeNotifier {
 
     // Apply sub-category filter
     if (_activeSubCategory > 0) {
-      final categories = [
+      const categories = [
         AppStrings.personal,
         AppStrings.work,
         AppStrings.urgent,

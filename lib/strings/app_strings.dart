@@ -38,14 +38,14 @@ class AppStrings {
   static const String deleteNote = 'Delete Note';
   
   // Delete Confirmation
-  static const String deleteTitle = 'Delete Note';
+  static const String deleteTitle = deleteNote;
   static const String deleteMessage = 'Are you sure you want to delete this note?';
   static const String deleteConfirm = 'DELETE';
   static const String deleteCancel = 'CANCEL';
   static const String deleteThisNote = 'Delete this note?';
   static const String deleteConfirmation = 'Are you sure you want to delete this note? This action cannot be undone and content will be permanently removed.';
   static const String cancel = 'Cancel';
-  static const String delete = 'Delete Note';
+  static const String delete = deleteNote;
   
   // Snackbars
   static const String noteDeleted = 'Note deleted';
