@@ -42,11 +42,6 @@ jobs:
         uses: SonarSource/sonarcloud-github-action@v2
         with:
           projectBaseDir: .
-          args: >
-            -Dsonar.dart.coverage.reportPath=./coverage/lcov.info
-            -Dsonar.exclusions=**/generated/**,**/*.g.dart,**/*.freezed.dart,**/build/**,windows/**,linux/**,macos/**,ios/**,android/**
-            -Dsonar.sources=lib
-            -Dsonar.tests=test
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
