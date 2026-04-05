@@ -4,45 +4,53 @@ on:
   push:
     branches:
       - main
-      - develop
   pull_request:
-    types: [opened, synchronize, reopened]
+    branches:
+      - main
 
 jobs:
   sonarcloud:
-    name: SonarCloud Scan
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup Flutter
+      - name: Setup Flutter SDK
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.x'
+          flutter-version: '3.41.6'
           channel: 'stable'
+          cache: true
 
-      - name: Install Flutter dependencies
+      - name: Install dependencies
         run: flutter pub get
 
-      - name: Run Flutter tests with coverage
+      - name: Run tests with coverage
         run: flutter test --coverage
 
-      - name: Verify coverage file was generated
+      - name: Verify coverage file
         run: |
-          echo "Checking coverage file..."
-          ls -la coverage/
-          echo "lcov.info content preview:"
-          head -20 coverage/lcov.info
+          if [ ! -f coverage/lcov.info ]; then
+            echo "Error: coverage/lcov.info was not generated"
+            exit 1
+          fi
+          echo "Coverage file verified successfully"
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v2
-        with:
-          projectBaseDir: .
+        uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=JoshnaChary_notes_application
+            -Dsonar.organization=joshnachary
+            -Dsonar.sources=lib/
+            -Dsonar.tests=test/
+            -Dsonar.dart.coverage.reportPath=coverage/lcov.info
+            -Dsonar.exclusions=**/generated/**,**/*.g.dart,**/*.freezed.dart,**/build/**,windows/**,linux/**,macos/**,ios/**,android/**
+            -Dsonar.sourceEncoding=UTF-8
 
