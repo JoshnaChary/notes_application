@@ -40,7 +40,7 @@ jobs:
           echo "Coverage file verified successfully"
 
       - name: SonarCloud Scan
-        uses: sonarsource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -50,7 +50,6 @@ jobs:
             -Dsonar.organization=joshnachary
             -Dsonar.sources=lib/
             -Dsonar.tests=test/
-            -Dsonar.coverageReportPaths=coverage/lcov.info
             -Dsonar.dart.coverage.reportPath=coverage/lcov.info
             -Dsonar.exclusions=**/generated/**,**/*.g.dart,**/*.freezed.dart,**/build/**,windows/**,linux/**,macos/**,ios/**,android/**
             -Dsonar.sourceEncoding=UTF-8
