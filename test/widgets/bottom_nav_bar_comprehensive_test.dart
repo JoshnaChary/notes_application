@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notes_application/widgets/bottom_nav_bar.dart';
 import 'package:notes_application/strings/app_strings.dart';
-import 'package:notes_application/theme/colors.dart';
 
 void main() {
   group('BottomNavBar Comprehensive Tests', () {
@@ -35,13 +34,11 @@ void main() {
     });
 
     testWidgets('first tab is highlighted when selectedIndex is 0', (WidgetTester tester) async {
-      int? selectedTab;
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             bottomNavigationBar: BottomNavBar(
               selectedIndex: 0,
-              onTabSelected: (index) => selectedTab = index,
             ),
           ),
         ),
@@ -52,13 +49,11 @@ void main() {
     });
 
     testWidgets('second tab is highlighted when selectedIndex is 1', (WidgetTester tester) async {
-      int? selectedTab;
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             bottomNavigationBar: BottomNavBar(
               selectedIndex: 1,
-              onTabSelected: (index) => selectedTab = index,
             ),
           ),
         ),

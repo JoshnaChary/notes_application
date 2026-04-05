@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notes_application/widgets/delete_confirmation_dialog.dart';
 import 'package:notes_application/strings/app_strings.dart';
-import 'package:notes_application/theme/colors.dart';
 
 void main() {
   group('DeleteConfirmationDialog Comprehensive Tests', () {

@@ -112,7 +112,6 @@ void main() {
     });
 
     testWidgets('onTap is not called when widget is null', (WidgetTester tester) async {
-      bool tapped = false;
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -126,7 +125,8 @@ void main() {
 
       await tester.tap(find.byType(GestureDetector));
       await tester.pumpAndSettle();
-      expect(tapped, false);
+      // Verify widget still renders when onTap is null
+      expect(find.byType(NoteCard), findsOneWidget);
     });
 
     testWidgets('renders different category colors', (WidgetTester tester) async {
@@ -137,7 +137,7 @@ void main() {
         ('PEACE', '#4CAF50'),
       ];
 
-      for (var (category, color) in categories) {
+      for (final (category, color) in categories) {
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -175,8 +175,8 @@ void main() {
     });
 
     testWidgets('text overflow is handled correctly', (WidgetTester tester) async {
-      const longTitle = 'This is a very long title that should be truncated with ellipsis';
-      const longBody = 'Line 1\nLine 2\nLine 3\nLine 4 should be truncated\nLine 5';
+      final longTitle = 'This is a very long title that should be truncated with ellipsis';
+      final longBody = 'Line 1\nLine 2\nLine 3\nLine 4 should be truncated\nLine 5';
 
       await tester.pumpWidget(
         MaterialApp(

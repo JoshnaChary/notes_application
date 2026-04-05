@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notes_application/models/note_model.dart';
 import 'package:notes_application/widgets/note_card.dart';
-import 'package:notes_application/theme/colors.dart';
 
 void main() {
   final baseTime = DateTime(2026, 3, 15, 12);
