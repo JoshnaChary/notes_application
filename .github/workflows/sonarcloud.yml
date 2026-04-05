@@ -37,7 +37,14 @@ jobs:
             echo "Error: coverage/lcov.info was not generated"
             exit 1
           fi
-          echo "Coverage file verified successfully"
+          echo "✓ Coverage file exists"
+          ls -lh coverage/lcov.info
+          echo "File size: $(wc -l < coverage/lcov.info) lines"
+          echo "First 20 lines:"
+          head -20 coverage/lcov.info
+          echo "Last 5 lines:"
+          tail -5 coverage/lcov.info
+          echo "✓ Coverage file verified successfully"
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v5.0.0
@@ -51,7 +58,7 @@ jobs:
             -Dsonar.language=dart
             -Dsonar.sources=lib/
             -Dsonar.tests=test/
-            -Dsonar.dart.coverage.reportPaths=coverage/lcov.info
+            -Dsonar.coverageReportPaths=coverage/lcov.info
             -Dsonar.exclusions=**/generated/**,**/*.g.dart,**/*.freezed.dart,**/build/**,windows/**,linux/**,macos/**,ios/**,android/**,test/**
             -Dsonar.sourceEncoding=UTF-8
             -Dsonar.projectBaseDir=.
