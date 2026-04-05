@@ -20,7 +20,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Flutter
-        uses: subosito/flutter-action@e938fdf56512cc96ef2f93e8a9c2bd6ec8a5d44a
+        uses: subosito/flutter-action@v3
         with:
           flutter-version: '3.x'
           channel: 'stable'
@@ -39,7 +39,7 @@ jobs:
           head -20 coverage/lcov.info
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@e44e1f68c7e374e39e09e37b5e5b66d6a5fb73a9
+        uses: SonarSource/sonarcloud-github-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
