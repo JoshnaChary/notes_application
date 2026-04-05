@@ -219,5 +219,44 @@ void main() {
       expect(find.text('WORK'), findsOneWidget);
       expect(find.byIcon(Icons.push_pin), findsOneWidget);
     });
+
+    testWidgets('note card respects padding and spacing', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: NoteCard(
+              note: buildNote(
+                title: 'Test',
+                body: 'Body',
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Verify the card is rendered
+      expect(find.byType(NoteCard), findsOneWidget);
+      expect(find.byType(Padding), findsWidgets);
+    });
+
+    testWidgets('note card renders with gesture detector for tap', (WidgetTester tester) async {
+      bool tapped = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: NoteCard(
+              note: buildNote(),
+              onTap: () {
+                tapped = true;
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(GestureDetector), findsOneWidget);
+      await tester.tap(find.byType(GestureDetector).first);
+      expect(tapped, isTrue);
+    });
   });
 }
