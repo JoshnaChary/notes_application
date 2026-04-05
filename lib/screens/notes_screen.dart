@@ -91,7 +91,13 @@ class _NotesScreenState extends State<NotesScreen> {
     const _SidebarItem(AppStrings.favourites, Icons.star),
     const _SidebarItem(AppStrings.pinned, Icons.push_pin),
   ];
-  final List<String> _tabs = [AppStrings.all, AppStrings.personal, AppStrings.work, AppStrings.urgent, AppStrings.peace];
+  final List<String> _tabs = [
+    AppStrings.all,
+    AppStrings.personal,
+    AppStrings.work,
+    AppStrings.urgent,
+    AppStrings.peace,
+  ];
 
   final TextEditingController _searchController = TextEditingController();
 
@@ -122,7 +128,8 @@ class _NotesScreenState extends State<NotesScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildTabBar(viewModel),
-          if (viewModel.errorMessage != null) _buildErrorBanner(viewModel.errorMessage!),
+          if (viewModel.errorMessage != null)
+            _buildErrorBanner(viewModel.errorMessage!),
           Expanded(child: _buildNotesBody(viewModel, filteredNotes)),
         ],
       ),
@@ -141,9 +148,14 @@ class _NotesScreenState extends State<NotesScreen> {
               final item = _sidebarItems[idx];
               final selected = viewModel.activeCategory == idx;
               return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 6,
+                ),
                 child: Material(
-                  color: selected ? const Color(0xFFCCE0FF) : Colors.transparent,
+                  color: selected
+                      ? const Color(0xFFCCE0FF)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(20),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(20),
@@ -152,16 +164,29 @@ class _NotesScreenState extends State<NotesScreen> {
                       Navigator.pop(context);
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 18,
+                      ),
                       child: Row(
                         children: [
-                          Icon(item.icon, color: selected ? const Color(0xFF003366) : Colors.grey, size: 28),
+                          Icon(
+                            item.icon,
+                            color: selected
+                                ? const Color(0xFF003366)
+                                : Colors.grey,
+                            size: 28,
+                          ),
                           const SizedBox(width: 18),
                           Text(
                             item.label,
                             style: TextStyle(
-                              fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-                              color: selected ? const Color(0xFF003366) : Colors.grey,
+                              fontWeight: selected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              color: selected
+                                  ? const Color(0xFF003366)
+                                  : Colors.grey,
                               fontSize: 18,
                             ),
                           ),
@@ -181,7 +206,7 @@ class _NotesScreenState extends State<NotesScreen> {
   PreferredSizeWidget _buildAppBar(NotesViewModel viewModel) {
     final title = _buildAppBarTitle(viewModel);
     final centerTitle = !viewModel.isSearching;
-    
+
     return AppBar(
       backgroundColor: Colors.white,
       title: title,
@@ -225,13 +250,13 @@ class _NotesScreenState extends State<NotesScreen> {
   Widget _buildTabBar(NotesViewModel viewModel) {
     return Container(
       color: Colors.white,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: List.generate(_tabs.length, (idx) {
-            return _buildTabChip(viewModel, idx);
-          }),
-        ),
+      width: double.infinity,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisSize: MainAxisSize.max,
+        children: List.generate(_tabs.length, (idx) {
+          return _buildTabChip(viewModel, idx);
+        }),
       ),
     );
   }
@@ -239,7 +264,7 @@ class _NotesScreenState extends State<NotesScreen> {
   Widget _buildTabChip(NotesViewModel viewModel, int idx) {
     final selected = viewModel.activeSubCategory == idx;
     final padding = _getTabPadding(idx);
-    
+
     return Padding(
       padding: padding,
       child: InkWell(
@@ -276,10 +301,7 @@ class _NotesScreenState extends State<NotesScreen> {
   }
 
   EdgeInsets _getTabPadding(int idx) {
-    return EdgeInsets.only(
-      left: idx == 0 ? AppSpacing.lg : AppSpacing.sm,
-      right: idx == _tabs.length - 1 ? AppSpacing.lg : AppSpacing.sm,
-    );
+    return const EdgeInsets.symmetric(horizontal: AppSpacing.sm);
   }
 
   Widget _buildErrorBanner(String message) {
@@ -287,10 +309,7 @@ class _NotesScreenState extends State<NotesScreen> {
       margin: const EdgeInsets.all(AppSpacing.md),
       padding: const EdgeInsets.all(AppSpacing.sm),
       color: Colors.red.shade100,
-      child: Text(
-        message,
-        style: TextStyle(color: Colors.red.shade900),
-      ),
+      child: Text(message, style: TextStyle(color: Colors.red.shade900)),
     );
   }
 
@@ -309,7 +328,8 @@ class _NotesScreenState extends State<NotesScreen> {
         bottom: 24,
       ),
       itemCount: filteredNotes.length,
-      itemBuilder: (context, idx) => _buildNoteListItem(filteredNotes[idx], viewModel),
+      itemBuilder: (context, idx) =>
+          _buildNoteListItem(filteredNotes[idx], viewModel),
     );
   }
 
@@ -322,11 +342,7 @@ class _NotesScreenState extends State<NotesScreen> {
       child: GestureDetector(
         onTap: () {
           ScaffoldMessenger.of(context).clearSnackBars();
-          Navigator.pushNamed(
-            context,
-            '/edit',
-            arguments: note,
-          );
+          Navigator.pushNamed(context, '/edit', arguments: note);
         },
         child: Container(
           decoration: BoxDecoration(
@@ -363,7 +379,9 @@ class _NotesScreenState extends State<NotesScreen> {
                     const SizedBox(height: 10),
                     Text(
                       note.body,
-                      style: AppTypography.body2.copyWith(color: AppColors.textTertiary),
+                      style: AppTypography.body2.copyWith(
+                        color: AppColors.textTertiary,
+                      ),
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -381,7 +399,12 @@ class _NotesScreenState extends State<NotesScreen> {
     );
   }
 
-  Widget _buildNoteActions(bool isFavourite, bool isPinned, Note note, NotesViewModel viewModel) {
+  Widget _buildNoteActions(
+    bool isFavourite,
+    bool isPinned,
+    Note note,
+    NotesViewModel viewModel,
+  ) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -389,23 +412,25 @@ class _NotesScreenState extends State<NotesScreen> {
           GestureDetector(
             key: const Key('favourite_button'),
             onTap: () {
-              final provider = Provider.of<NotesViewModel>(context, listen: false);
+              final provider = Provider.of<NotesViewModel>(
+                context,
+                listen: false,
+              );
               provider.toggleFavouriteStatus(note.id);
             },
             child: const Padding(
               padding: EdgeInsets.only(bottom: 4),
-              child: Icon(
-                Icons.star,
-                color: Colors.grey,
-                size: 22,
-              ),
+              child: Icon(Icons.star, color: Colors.grey, size: 22),
             ),
           ),
         if (isPinned)
           GestureDetector(
             key: const Key('pin_button'),
             onTap: () {
-              final provider = Provider.of<NotesViewModel>(context, listen: false);
+              final provider = Provider.of<NotesViewModel>(
+                context,
+                listen: false,
+              );
               provider.togglePinStatus(note.id);
             },
             child: const Icon(
