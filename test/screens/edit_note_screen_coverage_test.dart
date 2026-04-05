@@ -3,8 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:notes_application/models/note_model.dart';
 import 'package:notes_application/screens/edit_note_screen.dart';
 import 'package:notes_application/strings/app_strings.dart';
-import 'package:notes_application/theme/colors.dart';
-import 'package:notes_application/widgets/delete_confirmation_dialog.dart';
 
 void main() {
   final testNote = Note(

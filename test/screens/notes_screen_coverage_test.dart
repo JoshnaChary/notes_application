@@ -157,9 +157,6 @@ void main() {
 
       await tester.pump();
       
-      // Initially no search field
-      final searchBefore = find.byType(TextField);
-      
       // Tap search button
       await tester.tap(find.byKey(const Key('search_button')));
       await tester.pump();
