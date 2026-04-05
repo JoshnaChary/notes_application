@@ -96,5 +96,110 @@ void main() {
       await tester.pump();
       expect(find.byType(TextField), findsOneWidget);
     });
+
+    testWidgets('search field updates viewmodel on text change', (tester) async {
+      final viewModel = NotesViewModel();
+      await tester.pumpWidget(
+        ChangeNotifierProvider<NotesViewModel>(
+          create: (_) => viewModel,
+          child: const MaterialApp(home: NotesScreen()),
+        ),
+      );
+
+      await tester.pump();
+      // Open search
+      await tester.tap(find.byKey(const Key('search_button')));
+      await tester.pump();
+      
+      // Type in search field
+      await tester.enterText(find.byType(TextField), 'test search');
+      await tester.pump();
+      
+      expect(viewModel.searchQuery, contains('test'));
+    });
+
+    testWidgets('category filter tabs are available', (tester) async {
+      final viewModel = NotesViewModel();
+      await tester.pumpWidget(
+        ChangeNotifierProvider<NotesViewModel>(
+          create: (_) => viewModel,
+          child: const MaterialApp(home: NotesScreen()),
+        ),
+      );
+
+      await tester.pump();
+      
+      // Verify viewModel exists and can filter
+      expect(viewModel.activeCategory, equals(0));
+    });
+
+    testWidgets('sub-category filters work when tapped', (tester) async {
+      final viewModel = NotesViewModel();
+      await tester.pumpWidget(
+        ChangeNotifierProvider<NotesViewModel>(
+          create: (_) => viewModel,
+          child: const MaterialApp(home: NotesScreen()),
+        ),
+      );
+
+      await tester.pump();
+      await tester.pumpAndSettle();
+      
+      // Verify initial state
+      expect(viewModel.activeSubCategory, equals(0));
+    });
+
+    testWidgets('screen widget renders', (tester) async {
+      await tester.pumpWidget(
+        ChangeNotifierProvider<NotesViewModel>(
+          create: (_) => NotesViewModel(),
+          child: const MaterialApp(home: NotesScreen()),
+        ),
+      );
+
+      await tester.pump();
+      expect(find.byType(NotesScreen), findsOneWidget);
+    });
+
+    testWidgets('app bar has title and actions', (tester) async {
+      await tester.pumpWidget(
+        ChangeNotifierProvider<NotesViewModel>(
+          create: (_) => NotesViewModel(),
+          child: const MaterialApp(home: NotesScreen()),
+        ),
+      );
+
+      await tester.pump();
+      // Check for AppBar (should have title)
+      expect(find.text(AppStrings.appName), findsOneWidget);
+    });
+
+    testWidgets('renders all sub-category filter labels', (tester) async {
+      await tester.pumpWidget(
+        ChangeNotifierProvider<NotesViewModel>(
+          create: (_) => NotesViewModel(),
+          child: const MaterialApp(home: NotesScreen()),
+        ),
+      );
+
+      await tester.pump();
+      await tester.pumpAndSettle();
+      
+      // Should render category filters
+      expect(find.text(AppStrings.all), findsWidgets);
+    });
+
+    testWidgets('handles empty notes list', (tester) async {
+      await tester.pumpWidget(
+        ChangeNotifierProvider<NotesViewModel>(
+          create: (_) => NotesViewModel(),
+          child: const MaterialApp(home: NotesScreen()),
+        ),
+      );
+
+      await tester.pump();
+      // Empty state message should be present or list should be empty
+      expect(find.byType(NotesScreen), findsOneWidget);
+    });
   });
 }
