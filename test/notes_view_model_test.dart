@@ -1,3 +1,4 @@
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:notes_application/core/config/app_config.dart';
@@ -266,6 +267,112 @@ void main() {
       await vm.togglePinStatus('a');
       await vm.toggleFavouriteStatus('b');
       expect(vm.errorMessage, isNull);
+    });
+
+    test('loadNotes succeeds after one failed GET (retry path)', () {
+      fakeAsync((async) {
+        final stub = NotesRestStubClient(
+          failGetTimes: 1,
+          rows: [
+            testNoteJson(id: 'x'),
+          ],
+        );
+        final c = SupabaseClient(
+          'https://retry.test',
+          'k',
+          httpClient: stub,
+        );
+        final vm = NotesViewModel(supabaseClient: c);
+        vm.loadNotes();
+        async.elapse(const Duration(seconds: 2));
+        expect(vm.notes, hasLength(1));
+        expect(vm.errorMessage, isNull);
+      });
+    });
+
+    test('loadNotes sets network error after repeated GET failures', () {
+      fakeAsync((async) {
+        final stub = NotesRestStubClient(failGetTimes: 100);
+        final c = SupabaseClient(
+          'https://fail.test',
+          'k',
+          httpClient: stub,
+        );
+        final vm = NotesViewModel(supabaseClient: c);
+        vm.loadNotes();
+        async.elapse(const Duration(seconds: 6));
+        expect(vm.errorMessage, isNotNull);
+        expect(vm.errorMessage, contains('Network error'));
+      });
+    });
+
+    test('createNote records error when POST fails', () async {
+      final stub = NotesRestStubClient(failPost: true);
+      final c = SupabaseClient(
+        'https://post.fail',
+        'k',
+        httpClient: stub,
+      );
+      final vm = NotesViewModel(supabaseClient: c);
+      await vm.createNote(
+        Note(
+          id: '',
+          title: 't',
+          body: 'b',
+          category: AppStrings.work,
+          colorHex: '#000000',
+          createdAt: DateTime.utc(2024),
+          updatedAt: DateTime.utc(2024),
+        ),
+      );
+      expect(vm.errorMessage, contains('Failed to create note'));
+    });
+
+    test('updateNote records error when PATCH fails', () async {
+      final stub = NotesRestStubClient(failPatch: true);
+      final c = SupabaseClient(
+        'https://patch.fail',
+        'k',
+        httpClient: stub,
+      );
+      final vm = NotesViewModel(supabaseClient: c);
+      await vm.loadNotes();
+      await vm.updateNote(vm.notes.first);
+      expect(vm.errorMessage, contains('Failed to update note'));
+    });
+
+    test('deleteNote records error when DELETE fails', () async {
+      final stub = NotesRestStubClient(failDelete: true);
+      final c = SupabaseClient(
+        'https://del.fail',
+        'k',
+        httpClient: stub,
+      );
+      final vm = NotesViewModel(supabaseClient: c);
+      await vm.loadNotes();
+      await vm.deleteNote(vm.notes.first.id);
+      expect(vm.errorMessage, contains('Failed to delete note'));
+    });
+  });
+
+  group('NotesViewModel clientResolver', () {
+    test('second resolve succeeds after first throws', () {
+      var calls = 0;
+      final client = SupabaseClient(
+        'https://resolver.test',
+        'k',
+        httpClient: NotesRestStubClient(),
+      );
+      final vm = NotesViewModel(
+        clientResolver: () {
+          calls++;
+          if (calls == 1) {
+            throw Exception('init-once');
+          }
+          return client;
+        },
+      );
+      expect(vm.activeCategory, 0);
     });
   });
 }

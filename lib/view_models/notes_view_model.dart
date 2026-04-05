@@ -22,18 +22,24 @@ class NotesViewModel extends ChangeNotifier {
   int _activeSubCategory = 0; // 0: ALL, 1: PERSONAL, 2: WORK, 3: URGENT, 4: PEACE
 
   // Constructor
-  NotesViewModel({SupabaseClient? supabaseClient}) {
+  NotesViewModel({
+    SupabaseClient? supabaseClient,
+    SupabaseClient Function()? clientResolver,
+  }) {
     if (supabaseClient != null) {
       _supabase = supabaseClient;
       return;
     }
-    // Initialize Supabase with error handling
+    SupabaseClient resolve() {
+      final r = clientResolver;
+      if (r != null) return r();
+      return Supabase.instance.client;
+    }
     try {
-      _supabase = Supabase.instance.client;
+      _supabase = resolve();
     } catch (e) {
       debugPrint('Error initializing Supabase: $e');
-      // Fallback to default initialization
-      _supabase = Supabase.instance.client;
+      _supabase = resolve();
     }
   }
 
@@ -250,5 +256,19 @@ class NotesViewModel extends ChangeNotifier {
   /// Refresh notes from Supabase
   Future<void> refresh() async {
     await loadNotes();
+  }
+
+  @visibleForTesting
+  void setErrorMessageForTest(String? message) {
+    _errorMessage = message;
+    notifyListeners();
+  }
+
+  /// Replaces in-memory notes for widget tests (avoids extra [SupabaseClient] timers).
+  @visibleForTesting
+  void replaceNotesForTest(List<Note> notes) {
+    _notes = List.from(notes);
+    _applyFilters();
+    notifyListeners();
   }
 }

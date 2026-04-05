@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:notes_application/models/note_model.dart';
 import 'package:notes_application/screens/edit_note_screen.dart';
 import 'package:notes_application/strings/app_strings.dart';
+import 'package:notes_application/view_models/notes_view_model.dart';
+import 'package:provider/provider.dart';
+
+class MockNotesVm extends Mock implements NotesViewModel {}
 
 void main() {
   final testNote = Note(
@@ -342,6 +347,174 @@ void main() {
 
       // AppBar should be present
       expect(find.byType(AppBar), findsOneWidget);
+    });
+  });
+
+  group('EditNoteScreen provider flows', () {
+    late MockNotesVm mock;
+
+    final testNote = Note(
+      id: 'edit-test-1',
+      title: 'Existing Note',
+      body: 'This is existing content',
+      category: 'WORK',
+      colorHex: '#2D5BE3',
+      createdAt: DateTime(2024, 1, 1),
+      updatedAt: DateTime(2024, 1, 2),
+    );
+
+    setUp(() {
+      mock = MockNotesVm();
+      registerFallbackValue(
+        Note(
+          id: 'fb',
+          title: 't',
+          body: 'b',
+          category: 'WORK',
+          colorHex: '#000000',
+          createdAt: DateTime.utc(2020),
+          updatedAt: DateTime.utc(2020),
+        ),
+      );
+      when(() => mock.createNote(any())).thenAnswer((_) async {});
+      when(() => mock.updateNote(any())).thenAnswer((_) async {});
+      when(() => mock.deleteNote(any())).thenAnswer((_) async {});
+    });
+
+    testWidgets('formatting toolbar tooltips are tappable', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: EditNoteScreen(),
+        ),
+      );
+      await tester.pumpAndSettle();
+      for (final tip in <String>[
+        AppStrings.bold,
+        AppStrings.italic,
+        AppStrings.bulletedList,
+        AppStrings.checkbox,
+        AppStrings.attachImage,
+        AppStrings.insertLink,
+      ]) {
+        await tester.tap(find.byTooltip(tip));
+        await tester.pump();
+      }
+    });
+
+    testWidgets('back button pops route', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => TextButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => ChangeNotifierProvider<NotesViewModel>.value(
+                        value: mock,
+                        child: const EditNoteScreen(),
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('home'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('home'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.arrow_back));
+      await tester.pumpAndSettle();
+      expect(find.text('home'), findsOneWidget);
+    });
+
+    testWidgets('delete sheet cancel does not call deleteNote', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ChangeNotifierProvider<NotesViewModel>.value(
+            value: mock,
+            child: EditNoteScreen(note: testNote),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.more_vert));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(AppStrings.deleteNote));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('confirm_delete_button')));
+      await tester.pumpAndSettle();
+      verifyNever(() => mock.deleteNote(any()));
+    });
+
+    testWidgets('delete then undo snackbar calls createNote', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          initialRoute: '/',
+          routes: {
+            '/': (_) => Scaffold(
+                  body: Builder(
+                    builder: (context) => TextButton(
+                      onPressed: () => Navigator.of(context).pushNamed('/edit'),
+                      child: const Text('go'),
+                    ),
+                  ),
+                ),
+            '/edit': (_) => ChangeNotifierProvider<NotesViewModel>.value(
+                  value: mock,
+                  child: EditNoteScreen(note: testNote),
+                ),
+          },
+        ),
+      );
+      await tester.tap(find.text('go'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.more_vert));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(AppStrings.deleteNote));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('delete_button')));
+      await tester.pumpAndSettle();
+      verify(() => mock.deleteNote('edit-test-1')).called(1);
+      await tester.tap(find.text(AppStrings.undo));
+      await tester.pumpAndSettle();
+      verify(() => mock.createNote(any(that: isA<Note>()))).called(1);
+    });
+
+    testWidgets('new note delete confirm pops without deleteNote', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => TextButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => ChangeNotifierProvider<NotesViewModel>.value(
+                        value: mock,
+                        child: const EditNoteScreen(),
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('open'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.more_vert));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(AppStrings.deleteNote));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('delete_button')));
+      await tester.pumpAndSettle();
+      verifyNever(() => mock.deleteNote(any()));
+      expect(find.text('open'), findsOneWidget);
     });
   });
 }

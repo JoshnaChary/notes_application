@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:network_image_mock/network_image_mock.dart';
 import 'package:notes_application/models/note_model.dart';
 import 'package:notes_application/widgets/note_card.dart';
 
@@ -92,6 +93,22 @@ void main() {
       );
 
       expect(find.byType(Image), findsNothing);
+    });
+
+    testWidgets('shows network image when imageUrl is non-empty', (tester) async {
+      mockNetworkImagesFor(() async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: NoteCard(
+                note: buildNote(imageUrl: 'https://example.com/p.png'),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+        expect(find.byType(Image), findsOneWidget);
+      });
     });
   });
 }

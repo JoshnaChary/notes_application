@@ -35,10 +35,23 @@ Map<String, dynamic> testNoteJson({
 
 /// HTTP stub with [StreamedResponse.request] set so PostgREST can parse responses.
 class NotesRestStubClient extends http.BaseClient {
-  NotesRestStubClient({List<Map<String, dynamic>>? rows})
-      : _rows = List<Map<String, dynamic>>.from(rows ?? [testNoteJson()]);
+  NotesRestStubClient({
+    List<Map<String, dynamic>>? rows,
+    int failGetTimes = 0,
+    bool failPost = false,
+    bool failPatch = false,
+    bool failDelete = false,
+  })  : _rows = List<Map<String, dynamic>>.from(rows ?? [testNoteJson()]),
+        _failGetRemaining = failGetTimes,
+        _failPost = failPost,
+        _failPatch = failPatch,
+        _failDelete = failDelete;
 
   List<Map<String, dynamic>> _rows;
+  int _failGetRemaining;
+  final bool _failPost;
+  final bool _failPatch;
+  final bool _failDelete;
 
   List<Map<String, dynamic>> get rows => List.unmodifiable(_rows);
 
@@ -82,8 +95,23 @@ class NotesRestStubClient extends http.BaseClient {
 
     switch (request.method) {
       case 'GET':
+        if (_failGetRemaining > 0) {
+          _failGetRemaining--;
+          return _respond(
+            request,
+            '{"message":"stub failure","code":"stub"}',
+            500,
+          );
+        }
         return _respond(request, jsonEncode(_rows), 200);
       case 'POST':
+        if (_failPost) {
+          return _respond(
+            request,
+            '{"message":"insert failed"}',
+            500,
+          );
+        }
         var raw = '';
         if (request is http.Request) {
           raw = request.body;
@@ -93,6 +121,9 @@ class NotesRestStubClient extends http.BaseClient {
         expect(decoded['user_id'], AppConfig.hardcodedUserId);
         return _respond(request, jsonEncode(testNoteJson()), 201);
       case 'PATCH':
+        if (_failPatch) {
+          return _respond(request, '{"message":"update failed"}', 500);
+        }
         return _respond(
           request,
           jsonEncode(
@@ -101,6 +132,9 @@ class NotesRestStubClient extends http.BaseClient {
           200,
         );
       case 'DELETE':
+        if (_failDelete) {
+          return _respond(request, '{"message":"delete failed"}', 500);
+        }
         return _empty(request, 204);
       default:
         return _respond(request, '"unsupported"', 500);

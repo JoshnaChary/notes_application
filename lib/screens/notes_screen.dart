@@ -15,7 +15,7 @@ class _SidebarItem {
 }
 
 /// Maps tab label to Maestro/test key id (extracted from build for Sonar S3776).
-String _chipKeyForTab(String tab) {
+String chipKeyForTab(String tab) {
   switch (tab) {
     case AppStrings.all:
       return 'chip_all';
@@ -32,7 +32,7 @@ String _chipKeyForTab(String tab) {
   }
 }
 
-Key? _semanticKeyForNoteTitle(String title) {
+Key? semanticKeyForNoteTitle(String title) {
   if (title.contains('Favourite')) return const Key('favourite_test_note');
   if (title.contains('Pinned')) return const Key('pinned_test_note');
   return null;
@@ -268,7 +268,7 @@ class _NotesScreenState extends State<NotesScreen> {
     return Padding(
       padding: padding,
       child: InkWell(
-        key: Key(_chipKeyForTab(_tabs[idx])),
+        key: Key(chipKeyForTab(_tabs[idx])),
         onTap: () => viewModel.filterBySubCategory(idx),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -370,7 +370,7 @@ class _NotesScreenState extends State<NotesScreen> {
                       const SizedBox(height: 14),
                     ],
                     Text(
-                      key: _semanticKeyForNoteTitle(note.title),
+                      key: semanticKeyForNoteTitle(note.title),
                       note.title,
                       style: AppTypography.h2,
                       maxLines: 1,
