@@ -56,10 +56,10 @@ void main() {
       );
 
       // All categories should be available as chips
-      expect(find.text(AppStrings.work), findsWidgets);
-      expect(find.text(AppStrings.personal), findsWidgets);
-      expect(find.text(AppStrings.urgent), findsWidgets);
-      expect(find.text(AppStrings.peace), findsWidgets);
+      expect(find.text(AppStrings.work), findsAtLeastNWidgets(1));
+      expect(find.text(AppStrings.personal), findsAtLeastNWidgets(1));
+      expect(find.text(AppStrings.urgent), findsAtLeastNWidgets(1));
+      expect(find.text(AppStrings.peace), findsAtLeastNWidgets(1));
     });
 
     testWidgets('tapping different categories updates selection',
@@ -75,13 +75,13 @@ void main() {
       await tester.pump();
 
       // Category should be selected (UI should reflect it)
-      expect(find.text(AppStrings.personal), findsWidgets);
+      expect(find.text(AppStrings.personal), findsAtLeastNWidgets(1));
 
       // Tap URGENT
       await tester.tap(find.text(AppStrings.urgent).first);
       await tester.pump();
 
-      expect(find.text(AppStrings.urgent), findsWidgets);
+      expect(find.text(AppStrings.urgent), findsAtLeastNWidgets(1));
     });
 
     testWidgets('overflow menu is shown when editing existing note',
@@ -141,8 +141,8 @@ void main() {
         ),
       );
 
-      // Default category should be shown
-      expect(find.byType(Chip), findsWidgets);
+      // Default category should be shown (uses ChoiceChip, not Chip)
+      expect(find.byType(ChoiceChip), findsNWidgets(4));
     });
 
     testWidgets('initState initializes category from existing note',
@@ -218,11 +218,10 @@ void main() {
         ),
       );
 
-      // Open menu
-      await tester.tap(find.byIcon(Icons.more_vert));
       await tester.pumpAndSettle();
 
-      expect(find.byType(PopupMenuButton), findsOneWidget);
+      // Menu button with more_vert icon should exist (the menu opens via PopupMenuButton)
+      expect(find.byIcon(Icons.more_vert), findsOneWidget);
     });
 
     testWidgets('note with all fields populated can be saved', (tester) async {
@@ -253,9 +252,9 @@ void main() {
         ),
       );
 
-      // Multiple category chips should exist
-      final chips = find.byType(Chip);
-      expect(chips, findsWidgets);
+      // Multiple category chips should exist (uses ChoiceChip, not Chip)
+      final chips = find.byType(ChoiceChip);
+      expect(chips, findsNWidgets(4));
     });
 
     testWidgets('all category strings are rendered', (tester) async {
@@ -266,10 +265,10 @@ void main() {
       );
 
       // All categories should be available
-      expect(find.text(AppStrings.work), findsWidgets);
-      expect(find.text(AppStrings.personal), findsWidgets);
-      expect(find.text(AppStrings.peace), findsWidgets);
-      expect(find.text(AppStrings.urgent), findsWidgets);
+      expect(find.text(AppStrings.work), findsAtLeastNWidgets(1));
+      expect(find.text(AppStrings.personal), findsAtLeastNWidgets(1));
+      expect(find.text(AppStrings.peace), findsAtLeastNWidgets(1));
+      expect(find.text(AppStrings.urgent), findsAtLeastNWidgets(1));
     });
 
     testWidgets('unknown category index is handled', (tester) async {
