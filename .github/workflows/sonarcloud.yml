@@ -48,9 +48,11 @@ jobs:
           args: >
             -Dsonar.projectKey=JoshnaChary_notes_application
             -Dsonar.organization=joshnachary
+            -Dsonar.language=dart
             -Dsonar.sources=lib/
             -Dsonar.tests=test/
-            -Dsonar.dart.coverage.reportPath=coverage/lcov.info
-            -Dsonar.exclusions=**/generated/**,**/*.g.dart,**/*.freezed.dart,**/build/**,windows/**,linux/**,macos/**,ios/**,android/**
+            -Dsonar.dart.coverage.reportPaths=coverage/lcov.info
+            -Dsonar.exclusions=**/generated/**,**/*.g.dart,**/*.freezed.dart,**/build/**,windows/**,linux/**,macos/**,ios/**,android/**,test/**
             -Dsonar.sourceEncoding=UTF-8
+            -Dsonar.projectBaseDir=.
 
