@@ -20,33 +20,27 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Flutter
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        uses: subosito/flutter-action@e938fdf56512cc96ef2f93e8a9c2bd6ec8a5d44a
         with:
           flutter-version: '3.x'
           channel: 'stable'
 
-      - name: Install dependencies
+      - name: Install Flutter dependencies
         run: flutter pub get
-
-      - name: Build Flutter project
-        run: flutter build apk --debug
-        continue-on-error: true
 
       - name: Run Flutter tests with coverage
         run: flutter test --coverage
 
-      - name: Verify coverage file
+      - name: Verify coverage file was generated
         run: |
-          echo "=== Coverage folder ==="
+          echo "Checking coverage file..."
           ls -la coverage/
-          echo "=== lcov.info lines ==="
-          wc -l coverage/lcov.info
-          echo "=== lcov.info preview ==="
-          head -30 coverage/lcov.info
+          echo "lcov.info content preview:"
+          head -20 coverage/lcov.info
 
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v6
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@e44e1f68c7e374e39e09e37b5e5b66d6a5fb73a9
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: https://sonarcloud.io
 
