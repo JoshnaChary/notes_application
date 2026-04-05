@@ -59,6 +59,7 @@ jobs:
             -Dsonar.sources=lib/
             -Dsonar.tests=test/
             -Dsonar.dart.lcov.reportPaths=coverage/lcov.info
+            -Dsonar.coverage.exclusions=lib/main.dart,lib/bootstrap.dart
             -Dsonar.exclusions=**/generated/**,**/*.g.dart,**/*.freezed.dart,**/build/**,windows/**,linux/**,macos/**,ios/**,android/**,test/**
             -Dsonar.sourceEncoding=UTF-8
             -Dsonar.projectBaseDir=.

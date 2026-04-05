@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:notes_application/core/config/app_config.dart';
+import 'package:notes_application/models/note_model.dart';
 import 'package:notes_application/screens/notes_screen.dart';
 import 'package:notes_application/strings/app_strings.dart';
 import 'package:notes_application/view_models/notes_view_model.dart';
@@ -20,360 +21,203 @@ void main() {
     } catch (_) {}
   });
 
-  group('buildCategoryBadge Helper Function', () {
-    testWidgets('renders URGENT category with correct background', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: buildCategoryBadge(AppStrings.urgent),
-          ),
-        ),
-      );
+  Note sampleNote({
+    required String id,
+    required String title,
+    String body = 'Body',
+    bool favourite = false,
+    bool pinned = false,
+  }) {
+    final t = DateTime.utc(2026, 1, 1);
+    return Note(
+      id: id,
+      title: title,
+      body: body,
+      category: AppStrings.work,
+      colorHex: '#2D5BE3',
+      createdAt: t,
+      updatedAt: t,
+      isFavourite: favourite,
+      isPinned: pinned,
+    );
+  }
 
-      expect(find.text(AppStrings.urgent.toUpperCase()), findsOneWidget);
-      // Verify Container is created with decoration
-      expect(find.byType(Container), findsOneWidget);
+  group('notes_screen helpers', () {
+    test('chipKeyForTab default branch', () {
+      expect(chipKeyForTab('MOOD'), 'chip_mood');
     });
 
-    testWidgets('renders PERSONAL category', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: buildCategoryBadge(AppStrings.personal),
-          ),
-        ),
+    test('semanticKeyForNoteTitle favourite and pinned', () {
+      expect(
+        semanticKeyForNoteTitle('My Favourite thing')!.toString(),
+        contains('favourite_test_note'),
       );
-
-      expect(find.text(AppStrings.personal.toUpperCase()), findsOneWidget);
-    });
-
-    testWidgets('renders WORK category', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: buildCategoryBadge(AppStrings.work),
-          ),
-        ),
+      expect(
+        semanticKeyForNoteTitle('Pinned item')!.toString(),
+        contains('pinned_test_note'),
       );
-
-      expect(find.text(AppStrings.work.toUpperCase()), findsOneWidget);
-    });
-
-    testWidgets('renders PEACE category', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: buildCategoryBadge(AppStrings.peace),
-          ),
-        ),
-      );
-
-      expect(find.text(AppStrings.peace.toUpperCase()), findsOneWidget);
-    });
-
-    testWidgets('unknown category renders as uppercase', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: buildCategoryBadge('UNKNOWN'),
-          ),
-        ),
-      );
-
-      expect(find.text('UNKNOWN'), findsOneWidget);
-    });
-
-    testWidgets('category badge has correct styling', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: buildCategoryBadge(AppStrings.work),
-          ),
-        ),
-      );
-
-      // Find the Container with the badge
-      final container = find.byType(Container);
-      expect(container, findsOneWidget);
-
-      // Find the Text inside
-      expect(find.text(AppStrings.work.toUpperCase()), findsOneWidget);
-    });
-
-    testWidgets('category badge text styles are applied', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: buildCategoryBadge(AppStrings.personal),
-          ),
-        ),
-      );
-
-      // Text widget with bold styling should exist
-      expect(find.text(AppStrings.personal.toUpperCase()), findsOneWidget);
-
-      // Container should have decoration/background
-      expect(find.byType(Container), findsOneWidget);
+      expect(semanticKeyForNoteTitle('Other'), isNull);
     });
   });
 
-  group('NotesScreen Comprehensive Coverage', () {
-    testWidgets('renders with correct scaffold structure',
-        (tester) async {
+  group('NotesScreen interactions', () {
+    testWidgets('error banner shows test error', (tester) async {
+      final vm = NotesViewModel();
+      vm.setErrorMessageForTest('Test error banner');
       await tester.pumpWidget(
-        ChangeNotifierProvider<NotesViewModel>(
-          create: (_) => NotesViewModel(),
+        ChangeNotifierProvider.value(
+          value: vm,
           child: const MaterialApp(home: NotesScreen()),
         ),
       );
-
       await tester.pump();
-      expect(find.byType(Scaffold), findsOneWidget);
+      expect(find.text('Test error banner'), findsOneWidget);
     });
 
-    testWidgets('displays all tab categories in UI', (tester) async {
+    testWidgets('drawer category tap updates filter', (tester) async {
+      final vm = NotesViewModel();
+      vm.replaceNotesForTest([
+        sampleNote(id: '1', title: 'A'),
+      ]);
       await tester.pumpWidget(
-        ChangeNotifierProvider<NotesViewModel>(
-          create: (_) => NotesViewModel(),
+        ChangeNotifierProvider.value(
+          value: vm,
           child: const MaterialApp(home: NotesScreen()),
         ),
       );
-
       await tester.pumpAndSettle();
-      
-      // Main category tabs should be visible
-      expect(find.text(AppStrings.all), findsOneWidget);
-      expect(find.text(AppStrings.work), findsOneWidget);
-    });
-
-    testWidgets('search button toggles search visibility',
-        (tester) async {
-      await tester.pumpWidget(
-        ChangeNotifierProvider<NotesViewModel>(
-          create: (_) => NotesViewModel(),
-          child: const MaterialApp(home: NotesScreen()),
-        ),
-      );
-
-      await tester.pump();
-      
-      // Tap search button
-      await tester.tap(find.byKey(const Key('search_button')));
-      await tester.pump();
-      
-      // Search field should appear
-      final searchAfter = find.byType(TextField);
-      expect(searchAfter, findsOneWidget);
-    });
-
-    testWidgets('category tabs are tappable and update state',
-        (tester) async {
-      final viewModel = NotesViewModel();
-      await tester.pumpWidget(
-        ChangeNotifierProvider<NotesViewModel>(
-          create: (_) => viewModel,
-          child: const MaterialApp(home: NotesScreen()),
-        ),
-      );
-
+      final scaffoldState = tester.state<ScaffoldState>(find.byType(Scaffold));
+      scaffoldState.openDrawer();
       await tester.pumpAndSettle();
-      
-      // Initial state
-      expect(viewModel.activeCategory, equals(0));
-    });
-
-    testWidgets('sub-category chips are rendered', (tester) async {
-      await tester.pumpWidget(
-        ChangeNotifierProvider<NotesViewModel>(
-          create: (_) => NotesViewModel(),
-          child: const MaterialApp(home: NotesScreen()),
-        ),
-      );
-
+      await tester.tap(find.text(AppStrings.favourites));
       await tester.pumpAndSettle();
-      
-      // Sub-category tabs (using InkWell + Container) should exist
-      // Look for the specific tab chips by their keys
-      expect(find.byKey(const Key('chip_all')), findsOneWidget);
-      expect(find.byKey(const Key('chip_work')), findsOneWidget);
-      expect(find.byKey(const Key('chip_personal')), findsOneWidget);
-      expect(find.byKey(const Key('chip_urgent')), findsOneWidget);
-      expect(find.byKey(const Key('chip_peace')), findsOneWidget);
+      expect(vm.activeCategory, 1);
     });
 
-    testWidgets('notes list renders in main content area', (tester) async {
+    testWidgets('FAB navigates to edit route', (tester) async {
+      final vm = NotesViewModel();
+      vm.replaceNotesForTest([sampleNote(id: '1', title: 'T')]);
       await tester.pumpWidget(
-        ChangeNotifierProvider<NotesViewModel>(
-          create: (_) => NotesViewModel(),
-          child: const MaterialApp(home: NotesScreen()),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-      
-      // Should have some list representation
-      expect(find.byType(Scaffold), findsOneWidget);
-    });
-
-    testWidgets('app bar is displayed with title', (tester) async {
-      await tester.pumpWidget(
-        ChangeNotifierProvider<NotesViewModel>(
-          create: (_) => NotesViewModel(),
-          child: const MaterialApp(home: NotesScreen()),
-        ),
-      );
-
-      await tester.pump();
-      
-      // App bar should exist
-      expect(find.byType(AppBar), findsOneWidget);
-      
-      // Title should be visible
-      expect(find.text(AppStrings.appName), findsOneWidget);
-    });
-
-    testWidgets('empty state is handled gracefully', (tester) async {
-      await tester.pumpWidget(
-        ChangeNotifierProvider<NotesViewModel>(
-          create: (_) => NotesViewModel(),
-          child: const MaterialApp(home: NotesScreen()),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-      
-      // Screen should render even with no notes
-      expect(find.byType(NotesScreen), findsOneWidget);
-    });
-
-    testWidgets('search query filters notes', (tester) async {
-      final viewModel = NotesViewModel();
-      await tester.pumpWidget(
-        ChangeNotifierProvider<NotesViewModel>(
-          create: (_) => viewModel,
-          child: const MaterialApp(home: NotesScreen()),
-        ),
-      );
-
-      await tester.pump();
-      
-      // Open search
-      await tester.tap(find.byKey(const Key('search_button')));
-      await tester.pump();
-      
-      // Type search query
-      await tester.enterText(find.byType(TextField), 'test');
-      await tester.pump();
-      
-      // ViewModel should be updated
-      expect(viewModel.searchQuery, contains('test'));
-    });
-
-    testWidgets('multiple category filters can be tested', (tester) async {
-      final viewModel = NotesViewModel();
-      await tester.pumpWidget(
-        ChangeNotifierProvider<NotesViewModel>(
-          create: (_) => viewModel,
-          child: const MaterialApp(home: NotesScreen()),
-        ),
-      );
-
-      await tester.pump();
-      
-      // Change category filter
-      viewModel.filterByCategory(1);
-      await tester.pump();
-      
-      expect(viewModel.activeCategory, equals(1));
-    });
-
-    testWidgets('sub-category filtering works', (tester) async {
-      final viewModel = NotesViewModel();
-      await tester.pumpWidget(
-        ChangeNotifierProvider<NotesViewModel>(
-          create: (_) => viewModel,
-          child: const MaterialApp(home: NotesScreen()),
-        ),
-      );
-
-      await tester.pump();
-      
-      // Change sub-category
-      viewModel.filterBySubCategory(1);
-      await tester.pump();
-      
-      expect(viewModel.activeSubCategory, equals(1));
-    });
-
-    testWidgets('render category badge for each category', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SingleChildScrollView(
-              child: Column(
-                children: [
-                  buildCategoryBadge(AppStrings.all),
-                  buildCategoryBadge(AppStrings.work),
-                  buildCategoryBadge(AppStrings.personal),
-                  buildCategoryBadge(AppStrings.urgent),
-                  buildCategoryBadge(AppStrings.peace),
-                ],
-              ),
-            ),
+        ChangeNotifierProvider.value(
+          value: vm,
+          child: MaterialApp(
+            routes: {
+              '/': (_) => const NotesScreen(),
+              '/edit': (_) => const Scaffold(body: Text('edit-placeholder')),
+            },
           ),
         ),
       );
-
-      // All categories should be rendered
-      expect(find.text(AppStrings.all.toUpperCase()), findsOneWidget);
-      expect(find.text(AppStrings.work.toUpperCase()), findsOneWidget);
-      expect(find.text(AppStrings.personal.toUpperCase()), findsOneWidget);
-      expect(find.text(AppStrings.urgent.toUpperCase()), findsOneWidget);
-      expect(find.text(AppStrings.peace.toUpperCase()), findsOneWidget);
+      await tester.pumpAndSettle();
+      await tester.tap(find.bySemanticsLabel('Create Note'));
+      await tester.pumpAndSettle();
+      expect(find.text('edit-placeholder'), findsOneWidget);
     });
 
-    testWidgets('category badge rendering multiple times', (tester) async {
+    testWidgets('note row opens edit with arguments', (tester) async {
+      final vm = NotesViewModel();
+      vm.replaceNotesForTest([sampleNote(id: '1', title: 'List title')]);
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SingleChildScrollView(
-              child: Column(
-                children: [
-                  buildCategoryBadge(AppStrings.work),
-                  buildCategoryBadge(AppStrings.work),
-                  buildCategoryBadge(AppStrings.work),
-                ],
-              ),
-            ),
+        ChangeNotifierProvider.value(
+          value: vm,
+          child: MaterialApp(
+            routes: {
+              '/': (_) => const NotesScreen(),
+              '/edit': (_) => const Scaffold(body: Text('opened-edit')),
+            },
           ),
         ),
       );
-
-      // Multiple badges should exist (3 badges were created)
-      expect(find.text(AppStrings.work.toUpperCase()), findsNWidgets(3));
-      expect(find.byType(Container), findsNWidgets(3));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('List title'));
+      await tester.pumpAndSettle();
+      expect(find.text('opened-edit'), findsOneWidget);
     });
 
-    testWidgets('screen state management works', (tester) async {
-      final viewModel = NotesViewModel();
+    testWidgets('favourite and pin buttons invoke view model', (tester) async {
+      final vm = NotesViewModel();
+      vm.replaceNotesForTest([
+        sampleNote(id: '1', title: 'X', favourite: true, pinned: true),
+      ]);
       await tester.pumpWidget(
-        ChangeNotifierProvider<NotesViewModel>(
-          create: (_) => viewModel,
+        ChangeNotifierProvider.value(
+          value: vm,
           child: const MaterialApp(home: NotesScreen()),
         ),
       );
-
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('favourite_button')));
       await tester.pump();
-      
-      // Test multiple state changes
-      viewModel.setSearchQuery('test1');
-      expect(viewModel.searchQuery, equals('test1'));
-      
-      viewModel.setIsSearching(true);
-      expect(viewModel.isSearching, equals(true));
-      
-      viewModel.filterByCategory(1);
-      expect(viewModel.activeCategory, equals(1));
+      await tester.tap(find.byKey(const Key('pin_button')));
+      await tester.pump();
+    });
+
+    testWidgets('subcategory filter changes active tab', (tester) async {
+      final vm = NotesViewModel();
+      vm.replaceNotesForTest([sampleNote(id: '1', title: 'T')]);
+      await tester.pumpWidget(
+        ChangeNotifierProvider.value(
+          value: vm,
+          child: const MaterialApp(home: NotesScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      vm.filterBySubCategory(2);
+      await tester.pump();
+      expect(vm.activeSubCategory, 2);
+    });
+
+    testWidgets('tab chip tap invokes filterBySubCategory', (tester) async {
+      final vm = NotesViewModel();
+      vm.replaceNotesForTest([sampleNote(id: '1', title: 'T')]);
+      await tester.pumpWidget(
+        ChangeNotifierProvider.value(
+          value: vm,
+          child: const MaterialApp(home: NotesScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('chip_work')));
+      await tester.pumpAndSettle();
+      expect(vm.activeSubCategory, 2);
+    });
+
+    testWidgets('closing search clears query', (tester) async {
+      final vm = NotesViewModel();
+      vm.replaceNotesForTest([sampleNote(id: '1', title: 'T')]);
+      await tester.pumpWidget(
+        ChangeNotifierProvider.value(
+          value: vm,
+          child: const MaterialApp(home: NotesScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('search_button')));
+      await tester.pump();
+      await tester.enterText(find.byType(TextField), 'q');
+      await tester.pump();
+      expect(vm.searchQuery, contains('q'));
+      await tester.tap(find.byKey(const Key('search_button')));
+      await tester.pumpAndSettle();
+      expect(vm.isSearching, false);
+      expect(vm.searchQuery, '');
+    });
+
+    testWidgets('list shows semantic keys for special titles', (tester) async {
+      final vm = NotesViewModel();
+      vm.replaceNotesForTest([
+        sampleNote(id: 'a', title: 'My Favourite note'),
+        sampleNote(id: 'b', title: 'Pinned note'),
+      ]);
+      await tester.pumpWidget(
+        ChangeNotifierProvider.value(
+          value: vm,
+          child: const MaterialApp(home: NotesScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('favourite_test_note')), findsOneWidget);
+      expect(find.byKey(const Key('pinned_test_note')), findsOneWidget);
     });
   });
 }

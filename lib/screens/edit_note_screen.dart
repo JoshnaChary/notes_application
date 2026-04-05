@@ -226,7 +226,12 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
                 children: [
                   Icon(_isPinned ? Icons.push_pin : Icons.push_pin_outlined, color: Colors.grey),
                   const SizedBox(width: 8),
-                  Text(_isPinned ? AppStrings.unpinNote : AppStrings.pinNote),
+                  Expanded(
+                    child: Text(
+                      _isPinned ? AppStrings.unpinNote : AppStrings.pinNote,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -236,17 +241,28 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
                 children: [
                   Icon(_isFavourite ? Icons.star : Icons.star_border, color: Colors.grey),
                   const SizedBox(width: 8),
-                  Text(_isFavourite ? AppStrings.unfavourite : AppStrings.markAsFavourite),
+                  Expanded(
+                    child: Text(
+                      _isFavourite ? AppStrings.unfavourite : AppStrings.markAsFavourite,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ],
               ),
             ),
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'delete',
               child: Row(
                 children: [
-                  Icon(Icons.delete, color: Colors.red, size: 20),
-                  SizedBox(width: 8),
-                  Text(AppStrings.deleteNote, style: TextStyle(color: Colors.red)),
+                  const Icon(Icons.delete, color: Colors.red, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      AppStrings.deleteNote,
+                      style: const TextStyle(color: Colors.red),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ],
               ),
             ),
